@@ -1,0 +1,40 @@
+# 编译后的文件和二进制文件
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# 依赖目录
+/vendor/
+/node_modules/
+
+# IDE文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 日志文件
+*.log
+
+# 本地环境配置
+.env.local
+.env.*.local
+
+# 构建输出
+/dist/
+/build/
+/bin/
+/tmp/
+
+# 特定的项目文件
+/server/tmp/
+/web/build/
+/web/node_modules/
+
+# 系统文件
+.DS_Store
+Thumbs.db 
