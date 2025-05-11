@@ -12,6 +12,17 @@ import (
 type AppConfig struct {
 	ServerPort string
 	Mode       string
+	DB         DBConfig
+}
+
+// DBConfig 数据库配置
+type DBConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Name     string
+	Charset  string
 }
 
 // 初始化环境变量
@@ -58,6 +69,14 @@ func GetConfig() *AppConfig {
 		// 从环境变量中读取，如果不存在则使用默认值
 		ServerPort: getEnv("SERVER_PORT", ":8080"),
 		Mode:       getEnv("GIN_MODE", "debug"),
+		DB: DBConfig{
+			Host:     getEnv("DB_HOST", "localhost"),
+			Port:     getEnv("DB_PORT", "3306"),
+			User:     getEnv("DB_USER", "root"),
+			Password: getEnv("DB_PASSWORD", ""),
+			Name:     getEnv("DB_NAME", "student_management"),
+			Charset:  getEnv("DB_CHARSET", "utf8mb4"),
+		},
 	}
 }
 
