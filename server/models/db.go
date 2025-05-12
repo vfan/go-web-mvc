@@ -66,11 +66,15 @@ func InitDB() {
 	sqlDB.SetMaxOpenConns(100)          // 最大打开连接数
 	sqlDB.SetConnMaxLifetime(time.Hour) // 连接最大生存时间
 
-	// 自动迁移模型到数据库
-	migrateModels()
+	// 注意：我们不再自动迁移数据库结构
+	// 在现代开发环境中，数据库结构变更应该由专门的数据库管理员或通过正式的数据库迁移工具进行
+	// 这确保了数据库结构变更的可追踪性、安全性和一致性
 }
 
-// 自动迁移模型到数据库
+// 以下是数据库迁移代码，仅供参考，不再自动执行
+// 在实际生产环境中，应使用专门的数据库迁移工具，如 golang-migrate、atlas 等
+
+// migrateModels 自动迁移模型到数据库 (仅供开发环境参考)
 func migrateModels() {
 	// 根据模型自动迁移数据库表结构
 	err := DB.AutoMigrate(

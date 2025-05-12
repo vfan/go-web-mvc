@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -26,6 +27,13 @@ func (User) TableName() string {
 
 // 创建用户
 func CreateUser(user *User) error {
+	// 密码加密
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
+
 	return DB.Create(user).Error
 }
 
@@ -68,4 +76,32 @@ func GetUsers(page, pageSize int) ([]User, int64, error) {
 	offset := (page - 1) * pageSize
 	err = DB.Offset(offset).Limit(pageSize).Find(&users).Error
 	return users, total, err
+}
+
+// 验证用户登录
+func ValidateUserLogin(email, password string) (*User, error) {
+	// 查找用户
+	user, err := GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	// 验证密码
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return nil, err
+	}
+
+	// 验证用户状态
+	if user.Status != 1 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	return user, nil
+}
+
+// 更新用户最后登录时间
+func UpdateUserLastLoginTime(userID uint) error {
+	now := time.Now()
+	return DB.Model(&User{}).Where("id = ?", userID).Update("last_login_time", &now).Error
 }
