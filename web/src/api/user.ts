@@ -33,9 +33,26 @@ export interface UserUpdateParams {
 
 // 检查API响应状态
 const checkResponse = <T>(response: ApiResponse<T>): T => {
+  // 不处理已在api.ts中处理的code=-2未登录情况
   if (response.code !== 0) {
-    // 显示错误消息
-    message.error(response.msg || '请求失败');
+    // 根据错误码显示不同的错误消息
+    switch (response.code) {
+      case -1:
+        message.error(response.msg || '请求参数错误');
+        break;
+      case -3:
+        message.error(response.msg || '权限不足');
+        break;
+      case -4:
+        message.error(response.msg || '资源不存在');
+        break;
+      case -5:
+        message.error(response.msg || '服务器内部错误');
+        break;
+      default:
+        message.error(response.msg || '请求失败');
+        break;
+    }
     throw new Error(response.msg || '请求失败');
   }
   return response.data;
