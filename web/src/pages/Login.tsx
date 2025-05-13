@@ -12,7 +12,7 @@ function Login() {
     try {
       setLoading(true);
       // 调用登录接口
-      await api.post('/user/login', values);
+      await api.post('/auth/login', values);
       
       // 登录成功后存储令牌
       localStorage.setItem('token', 'mock-token'); // 实际应该使用服务端返回的token
@@ -49,12 +49,12 @@ function Login() {
             size="large"
           >
             <Form.Item
-              name="username"
-              rules={[{ required: true, message: '请输入用户名' }]}
+              name="email"
+              rules={[{ required: true, message: '请输入邮箱' }]}
             >
               <Input 
                 prefix={<UserOutlined className="text-gray-400" />} 
-                placeholder="用户名" 
+                placeholder="邮箱" 
               />
             </Form.Item>
             <Form.Item

@@ -36,19 +36,19 @@
 
 ```json
 {
-  "code": 200,        // HTTP状态码
-  "message": "成功",   // 响应消息
-  "data": {}          // 响应数据，可能是对象、数组或null
+  "code": 0,         // 状态码，0表示成功，小于0表示错误
+  "msg": "成功",      // 响应消息
+  "data": {}         // 响应数据，可能是对象、数组或null
 }
 ```
 
 常见状态码：
-- 200: 请求成功
-- 400: 请求参数错误
-- 401: 未授权（未登录或token无效）
-- 403: 权限不足
-- 404: 资源不存在
-- 500: 服务器内部错误
+- 0: 请求成功
+- -1: 请求参数错误
+- -2: 未授权（未登录或token无效）
+- -3: 权限不足
+- -4: 资源不存在
+- -5: 服务器内部错误
 
 ## API接口
 
@@ -72,8 +72,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "登录成功",
+    "code": 0,
+    "msg": "登录成功",
     "data": {
       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       "token_type": "Bearer",
@@ -96,8 +96,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": {
       "total": 100,
       "items": [
@@ -127,8 +127,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": {
       "id": 1,
       "email": "admin@example.com",
@@ -161,8 +161,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "创建成功",
+    "code": 0,
+    "msg": "创建成功",
     "data": {
       "id": 2,
       "email": "newuser@example.com",
@@ -196,8 +196,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "更新成功",
+    "code": 0,
+    "msg": "更新成功",
     "data": {
       "id": 2,
       "email": "updated@example.com",
@@ -220,8 +220,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "删除成功",
+    "code": 0,
+    "msg": "删除成功",
     "data": null
   }
   ```
@@ -240,8 +240,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": {
       "total": 50,
       "items": [
@@ -268,8 +268,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": [
       {
         "id": 1,
@@ -295,8 +295,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": {
       "id": 1,
       "name": "北京大学",
@@ -325,8 +325,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "创建成功",
+    "code": 0,
+    "msg": "创建成功",
     "data": {
       "id": 2,
       "name": "清华大学",
@@ -357,8 +357,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "更新成功",
+    "code": 0,
+    "msg": "更新成功",
     "data": {
       "id": 2,
       "name": "清华大学(更新)",
@@ -381,8 +381,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "删除成功",
+    "code": 0,
+    "msg": "删除成功",
     "data": null
   }
   ```
@@ -405,8 +405,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": {
       "total": 200,
       "items": [
@@ -444,8 +444,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "成功",
+    "code": 0,
+    "msg": "成功",
     "data": {
       "id": 1,
       "name": "张三",
@@ -498,8 +498,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "创建成功",
+    "code": 0,
+    "msg": "创建成功",
     "data": {
       "id": 2,
       "name": "李四",
@@ -552,8 +552,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "更新成功",
+    "code": 0,
+    "msg": "更新成功",
     "data": {
       "id": 2,
       "name": "李四(已更新)",
@@ -587,8 +587,8 @@
 
   ```json
   {
-    "code": 200,
-    "message": "删除成功",
+    "code": 0,
+    "msg": "删除成功",
     "data": null
   }
   ```
@@ -599,8 +599,8 @@
 
 ```json
 {
-  "code": 400,
-  "message": "无效的请求参数",
+  "code": -1,
+  "msg": "无效的请求参数",
   "data": null
 }
 ```
@@ -609,8 +609,8 @@
 
 ```json
 {
-  "code": 401,
-  "message": "未提供授权令牌",
+  "code": -2,
+  "msg": "未提供授权令牌",
   "data": null
 }
 ```
@@ -619,8 +619,8 @@
 
 ```json
 {
-  "code": 403,
-  "message": "需要管理员权限",
+  "code": -3,
+  "msg": "需要管理员权限",
   "data": null
 }
 ```
@@ -629,8 +629,8 @@
 
 ```json
 {
-  "code": 404,
-  "message": "未找到指定资源",
+  "code": -4,
+  "msg": "未找到指定资源",
   "data": null
 }
 ```
@@ -639,8 +639,8 @@
 
 ```json
 {
-  "code": 500,
-  "message": "服务器内部错误",
+  "code": -5,
+  "msg": "服务器内部错误",
   "data": null
 }
 ```

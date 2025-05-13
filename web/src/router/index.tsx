@@ -3,6 +3,7 @@ import App from '../App';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
+import UserList from '../pages/User';
 import type { ReactNode } from 'react';
 
 // 检查是否已登录
@@ -21,6 +22,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
   return <>{children}</>;
 };
+
+// 设置页面组件（暂时使用占位组件）
+const Settings = () => (
+  <div className="p-4">
+    <h2 className="text-2xl font-bold mb-4">系统设置</h2>
+    <p>系统设置页面，正在开发中...</p>
+  </div>
+);
 
 // 路由配置
 const router = createBrowserRouter([
@@ -41,6 +50,14 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Home />,
+      },
+      {
+        path: 'user',
+        element: <UserList />,
+      },
+      {
+        path: 'settings',
+        element: <Settings />,
       },
       {
         path: '*',
