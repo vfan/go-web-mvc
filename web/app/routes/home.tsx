@@ -1,7 +1,7 @@
 import type { Route } from "./+types/home";
 import { Layout, Menu, Button, Typography } from "antd";
 import { UserOutlined, DashboardOutlined, LogoutOutlined } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 
 const { Header, Content, Sider } = Layout;
 const { Title } = Typography;
@@ -20,7 +20,7 @@ export default function Home() {
   // 获取当前选中的菜单项
   const getSelectedKey = () => {
     const path = location.pathname;
-    if (path.includes('/users')) return 'user';
+    if (path.includes('/home/users')) return 'user';
     return 'dashboard';
   };
 
@@ -39,7 +39,7 @@ export default function Home() {
   const handleMenuClick = (key: string) => {
     switch (key) {
       case 'user':
-        navigate('/users');
+        navigate('/home/users');
         break;
       case 'dashboard':
         navigate('/home');
@@ -48,6 +48,9 @@ export default function Home() {
         break;
     }
   };
+
+  // 检查是否在首页（不是子路由）
+  const isRootHome = location.pathname === '/home';
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -79,11 +82,14 @@ export default function Home() {
           </Menu>
         </Sider>
         <Content style={{ padding: 24, margin: 0, minHeight: 280, background: '#fff' }}>
-          {location.pathname === '/home' && (
+          {isRootHome ? (
             <>
               <Title level={3}>欢迎使用 Go Web MVC 应用</Title>
               <p>您已成功登录系统。</p>
             </>
+          ) : (
+            // 渲染子路由内容
+            <Outlet />
           )}
         </Content>
       </Layout>

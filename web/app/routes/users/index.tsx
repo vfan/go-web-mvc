@@ -5,6 +5,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { getUserList, deleteUser } from '../../services/userService';
 import type { User } from '../+types/home';
 import UserForm from './components/UserForm';
+import { useNavigate } from 'react-router-dom';
 
 // 用户管理页面元数据
 export function meta() {
@@ -24,6 +25,7 @@ export default function UserManagement() {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
 
   // 加载用户数据
   const loadUsers = async () => {
@@ -65,6 +67,11 @@ export default function UserManagement() {
     setModalVisible(true);
   };
 
+  // 处理查看用户详情
+  const handleView = (id: number) => {
+    navigate(`/home/users/${id}`);
+  };
+
   // 处理添加用户
   const handleAdd = () => {
     setCurrentUser(null);
@@ -89,6 +96,9 @@ export default function UserManagement() {
       title: '用户名',
       dataIndex: 'username',
       key: 'username',
+      render: (text, record) => (
+        <a onClick={() => handleView(record.id)}>{text}</a>
+      ),
     },
     {
       title: '邮箱',
@@ -145,7 +155,7 @@ export default function UserManagement() {
   ];
 
   return (
-    <div className="p-6">
+    <div>
       {contextHolder}
       <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">用户管理</h1>

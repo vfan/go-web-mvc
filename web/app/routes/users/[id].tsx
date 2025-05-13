@@ -45,7 +45,7 @@ export default function UserDetail() {
 
   // 返回用户列表页
   const handleBack = () => {
-    navigate('/users');
+    navigate('/home/users');
   };
 
   return (
