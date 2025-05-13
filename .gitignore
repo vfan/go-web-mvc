@@ -7,6 +7,8 @@
 *.test
 *.out
 
+.cursor/
+
 # 依赖目录
 /vendor/
 /node_modules/
