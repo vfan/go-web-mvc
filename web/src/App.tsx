@@ -67,7 +67,7 @@ function App() {
   ]
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', width: '100%' }}>
       <Sider 
         trigger={null} 
         collapsible 
@@ -75,7 +75,7 @@ function App() {
         theme="light"
         style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}
       >
-        <div className="text-center p-4">
+        <div className="p-4" style={{ textAlign: 'left' }}>
           <h1 className="text-xl font-bold">Go Web MVC</h1>
         </div>
         <Menu
