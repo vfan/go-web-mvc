@@ -15,18 +15,25 @@ type UserController struct{}
 
 // 创建用户
 func (u *UserController) Create(c *gin.Context) {
-	var user models.User
+	var req models.RegisterRequest
 
 	// 绑定请求参数
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "参数错误: " + err.Error(),
 		})
 		return
 	}
 
+	// 创建用户对象
+	user := &models.User{
+		Email:    req.Email,
+		Password: req.Password,
+		Role:     req.Role,
+	}
+
 	// 创建用户
-	if err := models.CreateUser(&user); err != nil {
+	if err := models.CreateUser(user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "创建用户失败: " + err.Error(),
 		})

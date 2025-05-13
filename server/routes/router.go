@@ -28,6 +28,9 @@ func SetupRouter() *gin.Engine {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authController.Login)
+
+			// 临时添加创建用户接口
+			auth.POST("/register", userController.Create)
 		}
 
 		// 需要认证的路由

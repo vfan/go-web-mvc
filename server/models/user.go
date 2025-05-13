@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -28,6 +29,7 @@ func (User) TableName() string {
 // 创建用户
 func CreateUser(user *User) error {
 	// 密码加密
+	log.Println("创建用户密码：", user.Password)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -82,18 +84,30 @@ func GetUsers(page, pageSize int) ([]User, int64, error) {
 func ValidateUserLogin(email, password string) (*User, error) {
 	// 查找用户
 	user, err := GetUserByEmail(email)
+
+	tempPwd, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	log.Println("tempPwd", string(tempPwd))
+	log.Println("用户信息：", user)
+	log.Println("输入的密码：", password)
+	log.Println("数据库密码：", user.Password)
+
 	if err != nil {
+		log.Println("查找用户错误：", err)
 		return nil, err
 	}
 
 	// 验证密码
+	log.Println("开始验证密码")
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	log.Println("验证密码结果：", err)
 	if err != nil {
+		log.Println("密码错误：", err)
 		return nil, err
 	}
 
 	// 验证用户状态
 	if user.Status != 1 {
+		log.Println("用户状态不可用")
 		return nil, gorm.ErrRecordNotFound
 	}
 
@@ -104,4 +118,20 @@ func ValidateUserLogin(email, password string) (*User, error) {
 func UpdateUserLastLoginTime(userID uint) error {
 	now := time.Now()
 	return DB.Model(&User{}).Where("id = ?", userID).Update("last_login_time", &now).Error
+}
+
+// 创建重置密码函数
+func ResetUserPassword(email, newPassword string) error {
+	user, err := GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(hashedPassword)
+	return DB.Save(user).Error
 }

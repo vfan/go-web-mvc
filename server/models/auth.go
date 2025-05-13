@@ -6,6 +6,13 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required,min=6"`
 }
 
+// RegisterRequest 注册请求
+type RegisterRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+	Role     int8   `json:"role,omitempty"`
+}
+
 // LoginResponse 登录响应
 type LoginResponse struct {
 	Token     string `json:"token"`
