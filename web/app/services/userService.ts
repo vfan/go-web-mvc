@@ -5,6 +5,7 @@ import type { ApiResponse, User, PaginationParams, PaginatedData } from '../rout
 
 // API基础路径
 const API_BASE = '/api/users';
+const ADMIN_API_BASE = '/api/admin/users';
 
 /**
  * 获取用户列表
@@ -30,7 +31,7 @@ export async function getUserDetail(id: number): Promise<ApiResponse<User>> {
  * @returns 创建结果
  */
 export async function createUser(user: Partial<User>): Promise<ApiResponse<User>> {
-  return request<ApiResponse<User>>(API_BASE, {
+  return request<ApiResponse<User>>(ADMIN_API_BASE, {
     method: 'POST',
     body: JSON.stringify(user),
   });
@@ -43,7 +44,7 @@ export async function createUser(user: Partial<User>): Promise<ApiResponse<User>
  * @returns 更新结果
  */
 export async function updateUser(id: number, user: Partial<User>): Promise<ApiResponse<User>> {
-  return request<ApiResponse<User>>(`${API_BASE}/${id}`, {
+  return request<ApiResponse<User>>(`${ADMIN_API_BASE}/${id}`, {
     method: 'PUT',
     body: JSON.stringify(user),
   });
@@ -55,7 +56,7 @@ export async function updateUser(id: number, user: Partial<User>): Promise<ApiRe
  * @returns 删除结果
  */
 export async function deleteUser(id: number): Promise<ApiResponse<null>> {
-  return request<ApiResponse<null>>(`${API_BASE}/${id}`, {
+  return request<ApiResponse<null>>(`${ADMIN_API_BASE}/${id}`, {
     method: 'DELETE',
   });
 } 
