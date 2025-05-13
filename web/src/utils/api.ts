@@ -1,5 +1,12 @@
 import axios from 'axios';
 
+// API响应的通用接口
+export interface ApiResponse<T> {
+  code: number;
+  msg: string;
+  data: T;
+}
+
 // 创建 axios 实例
 const api = axios.create({
   baseURL: '/api', // 后端 API 的基础 URL
@@ -27,18 +34,21 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   response => {
-    // 根据约定，处理后端返回的数据格式
-    const res = response.data;
-    if (res.code !== 0) {
-      // 处理后端业务逻辑错误
-      console.error(res.msg || '请求出错');
-      return Promise.reject(new Error(res.msg || '请求出错'));
-    } else {
-      return res.data;
-    }
+    // 直接返回原始响应，让各个API服务自己处理数据提取
+    return response;
   },
   error => {
-    console.error('网络请求失败', error);
+    // 处理HTTP错误（网络错误或服务器错误）
+    if (error.response && error.response.status === 401) {
+      // 处理未授权情况，如重定向到登录页面
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    
+    // 显示错误消息
+    const errorMsg = error.response?.data?.msg || '网络请求失败';
+    console.error(errorMsg, error);
+    
     return Promise.reject(error);
   }
 );
