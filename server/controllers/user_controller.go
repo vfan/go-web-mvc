@@ -3,7 +3,7 @@ package controllers
 import (
 	"errors"
 	"mvc-demo/models"
-	"net/http"
+	"mvc-demo/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -19,9 +19,7 @@ func (u *UserController) Create(c *gin.Context) {
 
 	// 绑定请求参数
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "参数错误: " + err.Error(),
-		})
+		utils.ParamError(c, "参数错误: "+err.Error())
 		return
 	}
 
@@ -34,54 +32,39 @@ func (u *UserController) Create(c *gin.Context) {
 
 	// 创建用户
 	if err := models.CreateUser(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "创建用户失败: " + err.Error(),
-		})
+		utils.InternalError(c, "创建用户失败: "+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "创建用户成功",
-		"data":    user,
-	})
+	utils.SuccessWithMsg(c, "创建用户成功", user)
 }
 
 // 获取用户详情
 func (u *UserController) Get(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "无效的用户ID",
-		})
+		utils.ParamError(c, "无效的用户ID")
 		return
 	}
 
 	user, err := models.GetUserByID(uint(id))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "用户不存在",
-			})
+			utils.NotFound(c, "用户不存在")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "获取用户失败: " + err.Error(),
-			})
+			utils.InternalError(c, "获取用户失败: "+err.Error())
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": user,
-	})
+	utils.Success(c, user)
 }
 
 // 更新用户
 func (u *UserController) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "无效的用户ID",
-		})
+		utils.ParamError(c, "无效的用户ID")
 		return
 	}
 
@@ -89,13 +72,9 @@ func (u *UserController) Update(c *gin.Context) {
 	existingUser, err := models.GetUserByID(uint(id))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "用户不存在",
-			})
+			utils.NotFound(c, "用户不存在")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "获取用户失败: " + err.Error(),
-			})
+			utils.InternalError(c, "获取用户失败: "+err.Error())
 		}
 		return
 	}
@@ -103,9 +82,7 @@ func (u *UserController) Update(c *gin.Context) {
 	// 绑定请求参数
 	var updateData models.User
 	if err := c.ShouldBindJSON(&updateData); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "参数错误: " + err.Error(),
-		})
+		utils.ParamError(c, "参数错误: "+err.Error())
 		return
 	}
 
@@ -114,25 +91,18 @@ func (u *UserController) Update(c *gin.Context) {
 
 	// 更新用户
 	if err := models.UpdateUser(&updateData); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "更新用户失败: " + err.Error(),
-		})
+		utils.InternalError(c, "更新用户失败: "+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "更新用户成功",
-		"data":    updateData,
-	})
+	utils.SuccessWithMsg(c, "更新用户成功", updateData)
 }
 
 // 删除用户
 func (u *UserController) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "无效的用户ID",
-		})
+		utils.ParamError(c, "无效的用户ID")
 		return
 	}
 
@@ -140,28 +110,20 @@ func (u *UserController) Delete(c *gin.Context) {
 	_, err = models.GetUserByID(uint(id))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "用户不存在",
-			})
+			utils.NotFound(c, "用户不存在")
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "获取用户失败: " + err.Error(),
-			})
+			utils.InternalError(c, "获取用户失败: "+err.Error())
 		}
 		return
 	}
 
 	// 删除用户
 	if err := models.DeleteUser(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "删除用户失败: " + err.Error(),
-		})
+		utils.InternalError(c, "删除用户失败: "+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "删除用户成功",
-	})
+	utils.SuccessWithMsg(c, "删除用户成功", nil)
 }
 
 // 获取用户列表
@@ -173,18 +135,14 @@ func (u *UserController) List(c *gin.Context) {
 	// 获取用户列表
 	users, total, err := models.GetUsers(page, pageSize)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "获取用户列表失败: " + err.Error(),
-		})
+		utils.InternalError(c, "获取用户列表失败: "+err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": gin.H{
-			"list":  users,
-			"total": total,
-			"page":  page,
-			"size":  pageSize,
-		},
+	utils.Success(c, gin.H{
+		"list":  users,
+		"total": total,
+		"page":  page,
+		"size":  pageSize,
 	})
 }

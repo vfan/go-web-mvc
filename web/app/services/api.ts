@@ -50,9 +50,10 @@ export async function request<T>(url: string, options?: RequestInit): Promise<T>
   const result = await response.json();
   
   // 检查业务状态码
-  if (result.code !== 200) {
-    throw new Error(result.message || '请求失败');
+  if (result.code < 0) {
+    throw new Error(result.msg || '请求失败');
   }
   
-  return result;
+  // 返回业务数据
+  return result.data;
 } 
