@@ -88,10 +88,12 @@ func (u *UserController) Update(c *gin.Context) {
 
 	// 更新用户属性
 	updateData.ID = existingUser.ID
+	// 确保不更新创建时间
+	updateData.CreatedAt = existingUser.CreatedAt
 
 	// 更新用户
 	if err := models.UpdateUser(&updateData); err != nil {
-		utils.InternalError(c, "更新用户失败: "+err.Error())
+		utils.InternalError(c, err.Error())
 		return
 	}
 
@@ -119,7 +121,7 @@ func (u *UserController) Delete(c *gin.Context) {
 
 	// 删除用户
 	if err := models.DeleteUser(uint(id)); err != nil {
-		utils.InternalError(c, "删除用户失败: "+err.Error())
+		utils.InternalError(c, err.Error())
 		return
 	}
 

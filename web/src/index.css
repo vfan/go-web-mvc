@@ -16,6 +16,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 确保antd消息显示的z-index足够高 */
+.ant-message, 
+.ant-message-notice-content {
+  z-index: 9999 !important;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

@@ -14,7 +14,9 @@ export interface User {
 
 export interface UserListResponse {
   total: number;
-  items: User[];
+  list: User[];
+  page: number;
+  size: number;
 }
 
 export interface UserCreateParams {
@@ -35,24 +37,7 @@ export interface UserUpdateParams {
 const checkResponse = <T>(response: ApiResponse<T>): T => {
   // 不处理已在api.ts中处理的code=-2未登录情况
   if (response.code !== 0) {
-    // 根据错误码显示不同的错误消息
-    switch (response.code) {
-      case -1:
-        message.error(response.msg || '请求参数错误');
-        break;
-      case -3:
-        message.error(response.msg || '权限不足');
-        break;
-      case -4:
-        message.error(response.msg || '资源不存在');
-        break;
-      case -5:
-        message.error(response.msg || '服务器内部错误');
-        break;
-      default:
-        message.error(response.msg || '请求失败');
-        break;
-    }
+    // 直接返回错误信息，让UI层处理显示
     throw new Error(response.msg || '请求失败');
   }
   return response.data;

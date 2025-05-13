@@ -100,7 +100,7 @@
     "msg": "成功",
     "data": {
       "total": 100,
-      "items": [
+      "list": [
         {
           "id": 1,
           "email": "admin@example.com",
@@ -111,7 +111,9 @@
           "updated_at": "2023-05-10T15:30:45Z"
         },
         // ...更多用户
-      ]
+      ],
+      "page": 1,
+      "size": 10
     }
   }
   ```

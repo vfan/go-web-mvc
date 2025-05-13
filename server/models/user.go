@@ -55,7 +55,14 @@ func GetUserByEmail(email string) (*User, error) {
 
 // 更新用户
 func UpdateUser(user *User) error {
-	return DB.Save(user).Error
+	// 使用Updates而不是Save，只更新非零值字段
+	return DB.Model(user).Updates(map[string]interface{}{
+		"email":           user.Email,
+		"role":            user.Role,
+		"status":          user.Status,
+		"last_login_time": user.LastLoginTime,
+		// 不更新password和created_at字段
+	}).Error
 }
 
 // 删除用户

@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Card, Typography, Modal, message, Input, Form, Select } from 'antd';
+import { Table, Button, Space, Card, Typography, Modal, Input, Form, Select, App } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { getUserList, createUser, updateUser, deleteUser } from '../../api/user';
 import type { User, UserCreateParams, UserUpdateParams } from '../../api/user';
 
 const { Title } = Typography;
-const { confirm } = Modal;
 const { Search } = Input;
 const { Option } = Select;
 
@@ -22,6 +21,7 @@ const statusMap: Record<number, string> = {
 };
 
 function UserList() {
+  const { message, modal } = App.useApp();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -39,15 +39,17 @@ function UserList() {
     setLoading(true);
     try {
       const response = await getUserList(page, pageSize);
-      setUsers(response.items);
+      console.log(response);
+      setUsers(response.list || []);
       setPagination({
         ...pagination,
         current: page,
-        total: response.total
+        total: response.total || 0
       });
     } catch (error) {
       // 错误已在API服务中处理
       console.error('获取用户列表失败:', error);
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -64,7 +66,7 @@ function UserList() {
   };
 
   // 根据搜索文本过滤用户
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = (users || []).filter(user => 
     user.email?.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -77,7 +79,12 @@ function UserList() {
       form.resetFields();
       fetchUsers(pagination.current, pagination.pageSize);
     } catch (error) {
-      // 错误已在API服务中处理
+      // 在界面上显示错误提示
+      if (error instanceof Error) {
+        message.error(`添加用户失败: ${error.message}`);
+      } else {
+        message.error('添加用户失败，请重试');
+      }
     }
   };
 
@@ -90,7 +97,12 @@ function UserList() {
       form.resetFields();
       fetchUsers(pagination.current, pagination.pageSize);
     } catch (error) {
-      // 错误已在API服务中处理
+      // 在界面上显示错误提示
+      if (error instanceof Error) {
+        message.error(`更新用户失败: ${error.message}`);
+      } else {
+        message.error('更新用户失败，请重试');
+      }
     }
   };
 
@@ -109,7 +121,7 @@ function UserList() {
 
   // 处理删除用户
   const handleDeleteUser = (id: number) => {
-    confirm({
+    modal.confirm({
       title: '确认删除',
       icon: <ExclamationCircleOutlined />,
       content: '您确定要删除此用户吗？此操作不可逆。',
@@ -119,7 +131,12 @@ function UserList() {
           message.success('用户已删除');
           fetchUsers(pagination.current, pagination.pageSize);
         } catch (error) {
-          // 错误已在API服务中处理
+          // 在界面上显示错误提示
+          if (error instanceof Error) {
+            message.error(`删除用户失败: ${error.message}`);
+          } else {
+            message.error('删除用户失败，请重试');
+          }
         }
       },
     });
