@@ -3,29 +3,45 @@ import { Form, Input, Button, message, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import type { ApiResponse } from '../utils/api';
+
+interface LoginResponse {
+  token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+interface LoginParams {
+  email: string;
+  password: string;
+}
 
 function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: LoginParams) => {
     try {
       setLoading(true);
       // 调用登录接口
-      await api.post('/auth/login', values);
+      const response = await api.post<ApiResponse<LoginResponse>>('/auth/login', values);
       
-      // 登录成功后存储令牌
-      localStorage.setItem('token', 'mock-token'); // 实际应该使用服务端返回的token
-      localStorage.setItem('userInfo', JSON.stringify({
-        username: values.username,
-        role: 'user'
-      }));
-      
-      message.success('登录成功');
-      navigate('/');
+      if (response.data.code === 0) {
+        // 登录成功后存储令牌
+        const loginData = response.data.data;
+        localStorage.setItem('token', loginData.token);
+        localStorage.setItem('userInfo', JSON.stringify({
+          email: values.email
+        }));
+        
+        message.success('登录成功');
+        navigate('/');
+      } else {
+        message.error(response.data.msg || '登录失败');
+      }
     } catch (error) {
       console.error('登录失败:', error);
-      message.error('登录失败，请检查用户名和密码');
+      message.error('登录失败，请检查邮箱和密码');
     } finally {
       setLoading(false);
     }
@@ -50,7 +66,10 @@ function Login() {
           >
             <Form.Item
               name="email"
-              rules={[{ required: true, message: '请输入邮箱' }]}
+              rules={[
+                { required: true, message: '请输入邮箱' },
+                { type: 'email', message: '请输入有效的邮箱地址' }
+              ]}
             >
               <Input 
                 prefix={<UserOutlined className="text-gray-400" />} 

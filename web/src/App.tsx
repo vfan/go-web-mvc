@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Layout, Menu, Avatar, Dropdown, theme, Badge, Tooltip } from 'antd'
 import { 
   UserOutlined, 
@@ -17,11 +17,25 @@ const { Header, Sider, Content } = Layout
 
 function App() {
   const [collapsed, setCollapsed] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken()
+
+  // 获取用户信息
+  useEffect(() => {
+    const userInfoStr = localStorage.getItem('userInfo');
+    if (userInfoStr) {
+      try {
+        const userInfo = JSON.parse(userInfoStr);
+        setUserEmail(userInfo.email || '');
+      } catch (error) {
+        console.error('解析用户信息失败:', error);
+      }
+    }
+  }, []);
 
   // 获取当前选中的菜单项
   const getSelectedKey = () => {
@@ -61,10 +75,18 @@ function App() {
       label: '退出登录',
       onClick: () => {
         localStorage.removeItem('token')
+        localStorage.removeItem('userInfo')
         navigate('/login')
       },
     },
   ]
+
+  // 处理登出
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userInfo');
+    navigate('/login');
+  };
 
   return (
     <Layout style={{ minHeight: '100vh', width: '100%' }}>
@@ -113,7 +135,7 @@ function App() {
                     icon={<UserOutlined />} 
                     style={{ marginRight: '8px' }}
                   />
-                  <span>管理员</span>
+                  <span>{userEmail || '用户'}</span>
                 </div>
               </Dropdown>
             </div>
