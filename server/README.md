@@ -1,6 +1,194 @@
-# 服务端配置管理
+# Go Web MVC 项目
 
-## 配置文件
+本项目是一个基于Gin框架的Go语言Web应用，采用MVC架构设计模式，展示了分层架构的实现和最佳实践。
+
+## MVC三层架构概述
+
+MVC（Model-View-Controller）是一种软件架构模式，将应用程序分为三个主要部分：
+
+- **模型(Model)**: 处理数据和业务逻辑
+- **视图(View)**: 处理数据的可视化和用户界面
+- **控制器(Controller)**: 处理用户请求并调用模型和视图
+
+在本项目中，我们将MVC进一步细化为多层架构，更好地实现关注点分离和单一职责原则。
+
+## 多层架构详解
+
+### 1. 数据访问层 (DAO - Data Access Object)
+
+位置：`server/dao/`
+
+职责：
+- 提供对数据库的CRUD操作
+- 封装数据访问细节
+- 只关注数据的存取，不包含业务逻辑
+
+代码示例：
+```go
+// UserDAO 用户数据访问对象
+type UserDAO struct {
+    DB *gorm.DB
+}
+
+// GetByID 根据ID获取用户
+func (dao *UserDAO) GetByID(id int64) (*model.User, error) {
+    var user model.User
+    err := dao.DB.First(&user, id).Error
+    return &user, err
+}
+```
+
+### 2. 业务逻辑层 (Service)
+
+位置：`server/service/`
+
+职责：
+- 实现应用的业务逻辑和规则
+- 协调多个DAO操作，实现事务
+- 不直接与数据库交互，通过DAO层访问数据
+- 处理业务异常
+
+代码示例：
+```go
+// UserService 用户服务
+type UserService struct {
+    userDAO *dao.UserDAO
+}
+
+// Login 用户登录
+func (s *UserService) Login(email, password string) (*model.User, error) {
+    // 验证登录信息
+    user, err := s.userDAO.ValidateLogin(email, password)
+    if err != nil {
+        return nil, err
+    }
+    
+    // 更新最后登录时间
+    now := time.Now()
+    user.LastLoginTime = &now
+    s.userDAO.UpdateLastLoginTime(user.ID)
+    
+    return user, nil
+}
+```
+
+### 3. 控制器层 (Controller)
+
+位置：`server/controllers/`
+
+职责：
+- 处理HTTP请求和响应
+- 解析请求参数
+- 调用相应的Service进行处理
+- 返回适当的响应
+- 不包含业务逻辑
+
+代码示例：
+```go
+// UserController 用户控制器
+type UserController struct {
+    userService *service.UserService
+}
+
+// Login 用户登录
+func (a *AuthController) Login(c *gin.Context) {
+    var req dto.LoginRequest
+    
+    // 请求参数绑定
+    if err := c.ShouldBindJSON(&req); err != nil {
+        utils.ParamError(c, "无效的请求参数")
+        return
+    }
+    
+    // 验证用户是否存在且密码正确
+    user, err := a.userService.Login(req.Email, req.Password)
+    if err != nil {
+        utils.Unauthorized(c, "用户名或密码错误")
+        return
+    }
+    
+    // 生成JWT令牌
+    token, err := utils.GenerateToken(user)
+    if err != nil {
+        utils.InternalError(c, "生成令牌失败")
+        return
+    }
+    
+    // 返回响应
+    utils.SuccessWithMsg(c, "登录成功", dto.LoginResponse{
+        Token:     token,
+        TokenType: "Bearer",
+        ExpiresIn: expiresIn,
+    })
+}
+```
+
+### 4. 数据传输对象 (DTO - Data Transfer Object)
+
+位置：`server/models/dto/`
+
+职责：
+- 定义请求和响应的数据结构
+- 实现层与层之间的数据传输
+- 隔离内部模型和外部接口
+
+代码示例：
+```go
+// 登录请求
+type LoginRequest struct {
+    Email    string `json:"email" binding:"required,email"`
+    Password string `json:"password" binding:"required,min=6"`
+}
+
+// 登录响应
+type LoginResponse struct {
+    Token     string `json:"token"`
+    TokenType string `json:"token_type"`
+    ExpiresIn int    `json:"expires_in"` // 过期时间，单位：秒
+}
+```
+
+## 数据流向
+
+一个典型请求的数据流向：
+
+1. 客户端发送HTTP请求到Controller
+2. Controller解析请求参数，调用相应的Service方法
+3. Service实现业务逻辑，调用DAO进行数据操作
+4. DAO与数据库交互，执行CRUD操作
+5. 数据按相反顺序返回：DAO → Service → Controller → 客户端
+
+## 依赖注入
+
+本项目采用手动依赖注入的方式管理组件依赖关系：
+
+```go
+// 初始化依赖
+func initDependencies(db *gorm.DB) *AppDependencies {
+    // 初始化DAO
+    userDAO := dao.NewUserDAO(db)
+    
+    // 初始化服务
+    userService := service.NewUserService(userDAO)
+    
+    // 返回依赖集合
+    return &AppDependencies{
+        DB:          db,
+        UserDAO:     userDAO,
+        UserService: userService,
+    }
+}
+```
+
+## 多层架构的优势
+
+1. **关注点分离**：每一层只关注自己的职责
+2. **代码复用**：DAO和Service层可以被多个控制器共享
+3. **可测试性**：各层可以独立测试
+4. **可维护性**：修改一层代码不会影响其他层
+5. **可扩展性**：可以轻松扩展或替换任何一层的实现
+
+## 配置管理
 
 项目使用 `.env` 和 `.env.local` 文件来管理配置：
 
@@ -25,10 +213,9 @@
 
 # JWT 配置
 
+## JWT配置详细说明
 
-# JWT配置详细说明
-
-## 1. JWT_SECRET_KEY（JWT密钥）
+### 1. JWT_SECRET_KEY（JWT密钥）
 
 **作用**：这是用于签名和验证JWT令牌的密钥，是JWT安全机制的核心。
 - 签名过程：系统使用此密钥对JWT令牌的头部和载荷部分进行加密签名
@@ -43,7 +230,7 @@
 - 定期更换密钥
 - 永远不要硬编码在源代码中或提交到版本控制系统
 
-## 2. JWT_TOKEN_EXPIRY（令牌过期时间）
+### 2. JWT_TOKEN_EXPIRY（令牌过期时间）
 
 **作用**：定义访问令牌的有效期限，单位为小时。
 - 我们系统默认设置为24小时
@@ -57,7 +244,7 @@
 - 时间太短：用户需要频繁登录，影响体验
 - 时间太长：安全风险增加，被盗令牌的可用时间延长
 
-## 3. JWT_REFRESH_EXPIRY（刷新令牌过期时间）
+### 3. JWT_REFRESH_EXPIRY（刷新令牌过期时间）
 
 **作用**：定义刷新令牌的有效期限，单位为小时。
 - 我们系统默认设置为168小时（7天）
@@ -71,7 +258,7 @@
 - 当前我们系统只实现了访问令牌，没有实现刷新令牌机制
 - 但配置已预留，可以在后续开发中实现完整的刷新机制
 
-## 4. JWT_ISSUER（发行者）
+### 4. JWT_ISSUER（发行者）
 
 **作用**：标识令牌的发行者，通常是应用程序或组织的名称。
 - 在令牌的payload部分包含`iss`字段
