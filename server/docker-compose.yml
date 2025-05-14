@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: mvc-demo-app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=yourpassword
+      - DB_NAME=mvc_demo
+      - DB_CHARSET=utf8mb4
+      - GIN_MODE=release
+      - SERVER_PORT=:8080
+      - JWT_SECRET=your_jwt_secret_key
+      - JWT_EXPIRES=24h
+    networks:
+      - mvc-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mvc-demo-mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=yourpassword
+      - MYSQL_DATABASE=mvc_demo
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./db/db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mvc-network
+
+networks:
+  mvc-network:
+    driver: bridge
+
+volumes:
+  mysql-data: 
