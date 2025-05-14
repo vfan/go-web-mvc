@@ -147,6 +147,7 @@ function UserList() {
     setCurrentUser(user);
     form.setFieldsValue({
       email: user.email,
+      username: user.username,
       role: user.role,
       status: user.status
     });
@@ -182,6 +183,11 @@ function UserList() {
       title: '邮箱',
       dataIndex: 'email',
       key: 'email',
+    },
+    {
+      title: '姓名',
+      dataIndex: 'username',
+      key: 'username',
     },
     {
       title: '角色',
@@ -290,6 +296,13 @@ function UserList() {
               { required: true, message: '请输入邮箱' },
               { type: 'email', message: '请输入有效的邮箱地址' }
             ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="username"
+            label="姓名"
+            rules={[{ required: true, message: '请输入姓名' }]}
           >
             <Input />
           </Form.Item>

@@ -5,6 +5,7 @@ import type { ApiResponse } from '../utils/api';
 export interface User {
   id: number;
   email: string;
+  username?: string;
   role: number;
   status: number;
   last_login_time?: string;
@@ -21,6 +22,7 @@ export interface UserListResponse {
 
 export interface UserCreateParams {
   email: string;
+  username: string;
   password: string;
   role: number;
   status: number;
@@ -28,6 +30,7 @@ export interface UserCreateParams {
 
 export interface UserUpdateParams {
   email?: string;
+  username?: string;
   password?: string;
   role?: number;
   status?: number;

@@ -12,8 +12,9 @@ import (
 type User struct {
 	ID            uint           `gorm:"primaryKey" json:"id"`
 	Email         string         `gorm:"uniqueIndex;size:100;not null" json:"email"`
-	Password      string         `gorm:"size:255;not null" json:"-"`     // 不返回密码
-	Role          int8           `gorm:"default:2;not null" json:"role"` // 1:管理员,2:普通用户
+	Username      string         `gorm:"size:100;not null" json:"username"` // 添加姓名字段
+	Password      string         `gorm:"size:255;not null" json:"-"`        // 不返回密码
+	Role          int8           `gorm:"default:2;not null" json:"role"`    // 1:管理员,2:普通用户
 	LastLoginTime *time.Time     `gorm:"default:null" json:"last_login_time"`
 	Status        int8           `gorm:"default:1;not null" json:"status"` // 0:禁用,1:启用
 	CreatedAt     time.Time      `json:"created_at"`
@@ -58,6 +59,7 @@ func UpdateUser(user *User) error {
 	// 使用Updates而不是Save，只更新非零值字段
 	return DB.Model(user).Updates(map[string]interface{}{
 		"email":           user.Email,
+		"username":        user.Username,
 		"role":            user.Role,
 		"status":          user.Status,
 		"last_login_time": user.LastLoginTime,
