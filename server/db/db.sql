@@ -8,6 +8,7 @@ USE student_management;
 CREATE TABLE IF NOT EXISTS `users` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '用户ID',
   `email` VARCHAR(100) NOT NULL COMMENT '邮箱(登录账号)',
+  `username` VARCHAR(100) NOT NULL COMMENT '姓名',
   `password` VARCHAR(255) NOT NULL COMMENT '密码(加密存储)',
   `role` TINYINT NOT NULL DEFAULT 2 COMMENT '角色(1:管理员,2:普通用户)',
   `last_login_time` DATETIME DEFAULT NULL COMMENT '上次登录时间',

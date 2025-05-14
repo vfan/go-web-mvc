@@ -10,6 +10,9 @@ import (
 // AppDependencies 应用依赖接口
 type AppDependencies interface {
 	GetUserController() *controllers.UserController
+	GetAuthController() *controllers.AuthController
+	GetUniversityController() *controllers.UniversityController
+	GetStudentController() *controllers.StudentController
 }
 
 // SetupRouter 配置所有路由
@@ -24,10 +27,10 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 	api := r.Group("/api")
 	{
 		// 创建控制器实例
-		authController := &controllers.AuthController{}
+		authController := deps.GetAuthController()
 		userController := deps.GetUserController()
-		universityController := &controllers.UniversityController{}
-		studentController := &controllers.StudentController{}
+		universityController := deps.GetUniversityController()
+		studentController := deps.GetStudentController()
 
 		// 认证相关路由（无需认证）
 		auth := api.Group("/auth")

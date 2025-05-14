@@ -5,7 +5,7 @@ import (
 	"mvc-demo/config"
 	"mvc-demo/controllers"
 	"mvc-demo/dao"
-	"mvc-demo/models"
+	"mvc-demo/db"
 	"mvc-demo/routes"
 	"mvc-demo/service"
 
@@ -15,10 +15,17 @@ import (
 
 // 应用依赖
 type AppDependencies struct {
-	DB             *gorm.DB
-	UserDAO        *dao.UserDAO
-	UserService    *service.UserService
-	userController *controllers.UserController // 缓存控制器实例
+	DB                   *gorm.DB
+	UserDAO              *dao.UserDAO
+	UniversityDAO        *dao.UniversityDAO
+	StudentDAO           *dao.StudentDAO
+	UserService          *service.UserService
+	UniversityService    *service.UniversityService
+	StudentService       *service.StudentService
+	userController       *controllers.UserController
+	authController       *controllers.AuthController
+	universityController *controllers.UniversityController
+	studentController    *controllers.StudentController
 }
 
 // GetUserController 获取用户控制器
@@ -29,16 +36,40 @@ func (d *AppDependencies) GetUserController() *controllers.UserController {
 	return d.userController
 }
 
+// GetAuthController 获取认证控制器
+func (d *AppDependencies) GetAuthController() *controllers.AuthController {
+	if d.authController == nil {
+		d.authController = controllers.NewAuthController(d.UserService)
+	}
+	return d.authController
+}
+
+// GetUniversityController 获取大学控制器
+func (d *AppDependencies) GetUniversityController() *controllers.UniversityController {
+	if d.universityController == nil {
+		d.universityController = controllers.NewUniversityController(d.UniversityService)
+	}
+	return d.universityController
+}
+
+// GetStudentController 获取学生控制器
+func (d *AppDependencies) GetStudentController() *controllers.StudentController {
+	if d.studentController == nil {
+		d.studentController = controllers.NewStudentController(d.StudentService, d.UniversityService)
+	}
+	return d.studentController
+}
+
 func main() {
 	// 获取配置
 	appConfig := config.GetConfig()
 
 	// 初始化数据库连接
-	models.InitDB()
+	db.InitDB()
 	log.Println("数据库初始化完成")
 
 	// 初始化依赖
-	deps := initDependencies(models.DB)
+	deps := initDependencies(db.DB)
 
 	// 设置Gin模式
 	gin.SetMode(appConfig.Mode)
@@ -60,13 +91,21 @@ func main() {
 func initDependencies(db *gorm.DB) *AppDependencies {
 	// 初始化DAO
 	userDAO := dao.NewUserDAO(db)
+	universityDAO := dao.NewUniversityDAO(db)
+	studentDAO := dao.NewStudentDAO(db)
 
 	// 初始化服务
 	userService := service.NewUserService(userDAO)
+	universityService := service.NewUniversityService(universityDAO)
+	studentService := service.NewStudentService(studentDAO)
 
 	return &AppDependencies{
-		DB:          db,
-		UserDAO:     userDAO,
-		UserService: userService,
+		DB:                db,
+		UserDAO:           userDAO,
+		UniversityDAO:     universityDAO,
+		StudentDAO:        studentDAO,
+		UserService:       userService,
+		UniversityService: universityService,
+		StudentService:    studentService,
 	}
 }
