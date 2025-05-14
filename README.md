@@ -96,6 +96,44 @@ npm run dev
 
 默认情况下，前端开发服务器将在`http://localhost:5173`上运行，同时 vite会将 /api请求转发到后端服务也就是8080端口。
 
+## Docker部署
+
+本项目支持通过Docker进行部署，包含前端、后端和MySQL数据库服务。
+
+### 使用Docker Compose部署整个应用
+
+1. 确保已安装Docker和Docker Compose
+
+2. 在项目根目录下执行：
+
+```bash
+docker-compose up -d
+```
+
+这将启动三个服务:
+- 前端服务 (Nginx托管的React应用)：http://localhost
+- 后端服务 (Go API服务)：http://localhost:8080
+- MySQL数据库服务
+
+### 单独构建前端Docker镜像
+
+如果只需要构建前端Docker镜像：
+
+```bash
+cd web
+docker build -t go-web-mvc-frontend .
+docker run -p 80:80 go-web-mvc-frontend
+```
+
+前端应用将通过Nginx在http://localhost上提供服务。
+
+### 注意事项
+
+- 前端Docker配置使用Nginx作为Web服务器
+- Nginx配置已处理SPA前端路由问题
+- API请求将被自动转发到后端服务
+- 可以根据实际部署环境修改web/nginx.conf中的API转发配置
+
 ## API文档
 
 API接口文档请参考`server/api.md`文件，前端开发时请按照API文档进行接口调用。

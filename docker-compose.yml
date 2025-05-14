@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # 前端服务
+  web:
+    build: 
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - app-network
+
+  # 后端服务
+  server:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=go_web_mvc
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  # MySQL服务
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=go_web_mvc
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./server/db/db.sql:/docker-entrypoint-initdb.d/db.sql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data: 
