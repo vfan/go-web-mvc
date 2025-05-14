@@ -70,7 +70,7 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 			admin := authorized.Group("/admin")
 			admin.Use(middleware.AdminAuth())
 			{
-				// 用户管理
+				// 用户管理，注意：RESTful API 设计，POST 用于创建资源，PUT 用于更新资源，DELETE 用于删除资源。但是，在实际项目中，有可能只有GET和POST，没有PUT和DELETE。
 				admin.POST("/users", userController.Create)
 				admin.PUT("/users/:id", userController.Update)
 				admin.DELETE("/users/:id", userController.Delete)
