@@ -7,8 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AppDependencies 应用依赖接口
+type AppDependencies interface {
+	GetUserController() *controllers.UserController
+}
+
 // SetupRouter 配置所有路由
-func SetupRouter() *gin.Engine {
+func SetupRouter(deps AppDependencies) *gin.Engine {
 	r := gin.Default()
 
 	// 使用中间件
@@ -20,7 +25,7 @@ func SetupRouter() *gin.Engine {
 	{
 		// 创建控制器实例
 		authController := &controllers.AuthController{}
-		userController := &controllers.UserController{}
+		userController := deps.GetUserController()
 		universityController := &controllers.UniversityController{}
 		studentController := &controllers.StudentController{}
 

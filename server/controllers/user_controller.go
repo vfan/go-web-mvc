@@ -2,7 +2,9 @@ package controllers
 
 import (
 	"errors"
-	"mvc-demo/models"
+	"mvc-demo/dao/model"
+	"mvc-demo/models/dto"
+	"mvc-demo/service"
 	"mvc-demo/utils"
 	"strconv"
 
@@ -11,11 +13,20 @@ import (
 )
 
 // UserController 用户控制器
-type UserController struct{}
+type UserController struct {
+	userService *service.UserService
+}
 
-// 创建用户
+// NewUserController 创建用户控制器
+func NewUserController(userService *service.UserService) *UserController {
+	return &UserController{
+		userService: userService,
+	}
+}
+
+// Create 创建用户
 func (u *UserController) Create(c *gin.Context) {
-	var req models.RegisterRequest
+	var req dto.RegisterRequest
 
 	// 绑定请求参数
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -24,30 +35,43 @@ func (u *UserController) Create(c *gin.Context) {
 	}
 
 	// 创建用户对象
-	user := &models.User{
+	user := &model.User{
 		Email:    req.Email,
 		Password: req.Password,
 		Role:     req.Role,
+		Username: req.Username,
 	}
 
 	// 创建用户
-	if err := models.CreateUser(user); err != nil {
+	if err := u.userService.CreateUser(user); err != nil {
 		utils.InternalError(c, "创建用户失败: "+err.Error())
 		return
 	}
 
-	utils.SuccessWithMsg(c, "创建用户成功", user)
+	// 转换为响应DTO
+	response := &dto.UserResponse{
+		ID:            user.ID,
+		Email:         user.Email,
+		Username:      user.Username,
+		Role:          user.Role,
+		Status:        user.Status,
+		LastLoginTime: user.LastLoginTime,
+		CreatedAt:     user.CreatedAt,
+		UpdatedAt:     user.UpdatedAt,
+	}
+
+	utils.SuccessWithMsg(c, "创建用户成功", response)
 }
 
-// 获取用户详情
+// Get 获取用户详情
 func (u *UserController) Get(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		utils.ParamError(c, "无效的用户ID")
 		return
 	}
 
-	user, err := models.GetUserByID(uint(id))
+	user, err := u.userService.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.NotFound(c, "用户不存在")
@@ -57,19 +81,31 @@ func (u *UserController) Get(c *gin.Context) {
 		return
 	}
 
-	utils.Success(c, user)
+	// 转换为响应DTO
+	response := &dto.UserResponse{
+		ID:            user.ID,
+		Email:         user.Email,
+		Username:      user.Username,
+		Role:          user.Role,
+		Status:        user.Status,
+		LastLoginTime: user.LastLoginTime,
+		CreatedAt:     user.CreatedAt,
+		UpdatedAt:     user.UpdatedAt,
+	}
+
+	utils.Success(c, response)
 }
 
-// 更新用户
+// Update 更新用户
 func (u *UserController) Update(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		utils.ParamError(c, "无效的用户ID")
 		return
 	}
 
 	// 检查用户是否存在
-	existingUser, err := models.GetUserByID(uint(id))
+	existingUser, err := u.userService.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.NotFound(c, "用户不存在")
@@ -80,36 +116,50 @@ func (u *UserController) Update(c *gin.Context) {
 	}
 
 	// 绑定请求参数
-	var updateData models.User
+	var updateData dto.RegisterRequest
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		utils.ParamError(c, "参数错误: "+err.Error())
 		return
 	}
 
 	// 更新用户属性
-	updateData.ID = existingUser.ID
-	// 确保不更新创建时间
-	updateData.CreatedAt = existingUser.CreatedAt
+	existingUser.Email = updateData.Email
+	existingUser.Username = updateData.Username
+	if updateData.Role > 0 {
+		existingUser.Role = updateData.Role
+	}
 
 	// 更新用户
-	if err := models.UpdateUser(&updateData); err != nil {
+	if err := u.userService.UpdateUser(existingUser); err != nil {
 		utils.InternalError(c, err.Error())
 		return
 	}
 
-	utils.SuccessWithMsg(c, "更新用户成功", updateData)
+	// 转换为响应DTO
+	response := &dto.UserResponse{
+		ID:            existingUser.ID,
+		Email:         existingUser.Email,
+		Username:      existingUser.Username,
+		Role:          existingUser.Role,
+		Status:        existingUser.Status,
+		LastLoginTime: existingUser.LastLoginTime,
+		CreatedAt:     existingUser.CreatedAt,
+		UpdatedAt:     existingUser.UpdatedAt,
+	}
+
+	utils.SuccessWithMsg(c, "更新用户成功", response)
 }
 
-// 删除用户
+// Delete 删除用户
 func (u *UserController) Delete(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		utils.ParamError(c, "无效的用户ID")
 		return
 	}
 
 	// 检查用户是否存在
-	_, err = models.GetUserByID(uint(id))
+	_, err = u.userService.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			utils.NotFound(c, "用户不存在")
@@ -120,7 +170,7 @@ func (u *UserController) Delete(c *gin.Context) {
 	}
 
 	// 删除用户
-	if err := models.DeleteUser(uint(id)); err != nil {
+	if err := u.userService.DeleteUser(id); err != nil {
 		utils.InternalError(c, err.Error())
 		return
 	}
@@ -128,23 +178,40 @@ func (u *UserController) Delete(c *gin.Context) {
 	utils.SuccessWithMsg(c, "删除用户成功", nil)
 }
 
-// 获取用户列表
+// List 获取用户列表
 func (u *UserController) List(c *gin.Context) {
 	// 获取分页参数
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
 	// 获取用户列表
-	users, total, err := models.GetUsers(page, pageSize)
+	users, total, err := u.userService.GetUserList(page, pageSize)
 	if err != nil {
 		utils.InternalError(c, "获取用户列表失败: "+err.Error())
 		return
 	}
 
-	utils.Success(c, gin.H{
-		"list":  users,
-		"total": total,
-		"page":  page,
-		"size":  pageSize,
-	})
+	// 转换为响应DTO
+	var responseList []*dto.UserResponse
+	for _, user := range users {
+		responseList = append(responseList, &dto.UserResponse{
+			ID:            user.ID,
+			Email:         user.Email,
+			Username:      user.Username,
+			Role:          user.Role,
+			Status:        user.Status,
+			LastLoginTime: user.LastLoginTime,
+			CreatedAt:     user.CreatedAt,
+			UpdatedAt:     user.UpdatedAt,
+		})
+	}
+
+	response := &dto.UserListResponse{
+		List:  responseList,
+		Total: total,
+		Page:  page,
+		Size:  pageSize,
+	}
+
+	utils.Success(c, response)
 }
