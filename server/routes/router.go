@@ -20,8 +20,7 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 	r := gin.Default()
 
 	// 使用中间件
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
+	// gin.Default() 已经默认添加了 Logger 和 Recovery 中间件，无需重复添加
 
 	// API 路由组
 	api := r.Group("/api")
