@@ -16,6 +16,15 @@ type RegisterRequest struct {
 	Username string `json:"username" binding:"required"`
 }
 
+// 用户更新请求
+type UserUpdateRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password,omitempty"` // 密码可选
+	Role     int32  `json:"role,omitempty"`
+	Username string `json:"username" binding:"required"`
+	Status   int32  `json:"status,omitempty"`
+}
+
 // 登录响应
 type LoginResponse struct {
 	Token     string `json:"token"`

@@ -49,15 +49,22 @@ func (dao *UserDAO) GetByEmail(email string) (*model.User, error) {
 
 // Update 更新用户
 func (dao *UserDAO) Update(user *model.User) error {
-	// 使用Updates而不是Save，只更新非零值字段
-	return dao.DB.Model(user).Updates(map[string]interface{}{
+	// 准备待更新的字段
+	updates := map[string]interface{}{
 		"email":           user.Email,
 		"role":            user.Role,
 		"status":          user.Status,
 		"last_login_time": user.LastLoginTime,
 		"username":        user.Username,
-		// 不更新password和created_at字段
-	}).Error
+	}
+
+	// 如果密码字段不为空，则更新密码
+	if len(user.Password) > 0 {
+		updates["password"] = user.Password
+	}
+
+	// 使用Updates而不是Save，只更新指定字段
+	return dao.DB.Model(user).Updates(updates).Error
 }
 
 // Delete 删除用户

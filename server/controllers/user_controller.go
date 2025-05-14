@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -116,7 +117,7 @@ func (u *UserController) Update(c *gin.Context) {
 	}
 
 	// 绑定请求参数
-	var updateData dto.RegisterRequest
+	var updateData dto.UserUpdateRequest
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		utils.ParamError(c, "参数错误: "+err.Error())
 		return
@@ -127,6 +128,20 @@ func (u *UserController) Update(c *gin.Context) {
 	existingUser.Username = updateData.Username
 	if updateData.Role > 0 {
 		existingUser.Role = updateData.Role
+	}
+	if updateData.Status > 0 {
+		existingUser.Status = updateData.Status
+	}
+
+	// 如果有提供密码，则更新密码
+	if updateData.Password != "" {
+		// 加密新密码
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateData.Password), bcrypt.DefaultCost)
+		if err != nil {
+			utils.InternalError(c, "密码加密失败: "+err.Error())
+			return
+		}
+		existingUser.Password = string(hashedPassword)
 	}
 
 	// 更新用户
