@@ -35,7 +35,7 @@ WORKDIR /app
 COPY --from=builder /app/app .
 
 # 复制配置文件（如果有）
-COPY --from=builder /app/.env* ./
+# COPY --from=builder /app/.env* ./
 
 # 暴露应用端口
 EXPOSE 8080

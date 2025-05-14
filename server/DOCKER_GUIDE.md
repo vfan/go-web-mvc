@@ -22,12 +22,16 @@ docker build -t mvc-demo:latest .
 ```bash
 docker run -d -p 8080:8080 \
   --name mvc-demo \
-  -e DB_HOST=your_db_host \
+  -e DB_HOST=10.213.202.230 \
   -e DB_PORT=3306 \
-  -e DB_USER=root \
-  -e DB_PASSWORD=your_password \
-  -e DB_NAME=mvc_demo \
+  -e DB_USER=web \
+  -e DB_PASSWORD=golang@2025 \
+  -e DB_NAME=student_management \
   -e GIN_MODE=release \
+  -e JWT_SECRET_KEY=your-secret-key-change-in-production \
+  -e JWT_TOKEN_EXPIRY=24 \
+  -e JWT_REFRESH_EXPIRY=168 \
+  -e JWT_ISSUER=student-management-system \
   mvc-demo:latest
 ```
 
