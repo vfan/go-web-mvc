@@ -1,47 +1,44 @@
-# 第一阶段：构建应用
+# 第一阶段：构建Go应用
 FROM golang:1.23-alpine AS builder
+
+# 设置Go环境变量
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOPROXY=https://goproxy.cn,direct
 
 # 设置工作目录
 WORKDIR /app
 
-# 安装必要的系统依赖
-RUN apk add --no-cache gcc musl-dev
+# 复制go mod和sum文件，先复制go.mod和go.sum，再复制其他文件，是为了加快构建速度，因为go.mod和go.sum不会经常变化。原理是docker的缓存机制，如果go.mod和go.sum没有变化，就不会重新下载依赖。
 
-# 复制go.mod和go.sum文件
 COPY go.mod go.sum ./
 
-# 下载所有依赖
+# 下载依赖
 RUN go mod download
 
 # 复制源代码
 COPY . .
 
 # 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+RUN go build -o main .
 
-# 第二阶段：创建最小运行镜像
+# 第二阶段：运行阶段，alpine是轻量级的linux发行版，适合部署在docker中
 FROM alpine:latest
-
-# 安装必要的运行时依赖
-RUN apk --no-cache add ca-certificates tzdata
-
-# 设置中国时区
-ENV TZ=Asia/Shanghai
 
 # 设置工作目录
 WORKDIR /app
 
-# 从构建阶段复制编译好的应用
-COPY --from=builder /app/app .
+# 从builder阶段复制二进制文件
+COPY --from=builder /app/main .
 
-# 复制配置文件（如果有）
-# COPY --from=builder /app/.env* ./
+# 复制环境配置文件，也可以不需要，视具体情况
+# COPY --from=builder /app/.env .
 
-# 暴露应用端口
+
+# 暴露8080端口
 EXPOSE 8080
 
-# 运行应用
-CMD ["./app"]
-
-# 提供健康检查
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget --spider -q http://localhost:8080/health || exit 1 
+# 直接运行应用
+CMD ["./main"] 
