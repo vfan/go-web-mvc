@@ -8,7 +8,8 @@ import {
   TeamOutlined,
   SettingOutlined,
   BellOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  BankOutlined
 } from '@ant-design/icons'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import './App.css'
@@ -41,7 +42,8 @@ function App() {
   const getSelectedKey = () => {
     if (location.pathname === '/') return '1'
     if (location.pathname.startsWith('/user')) return '2'
-    if (location.pathname.startsWith('/settings')) return '3'
+    if (location.pathname.startsWith('/university')) return '3'
+    if (location.pathname.startsWith('/settings')) return '4'
     return '1'
   }
 
@@ -58,6 +60,11 @@ function App() {
     },
     {
       key: '3',
+      icon: <BankOutlined />,
+      label: <Link to="/university">大学管理</Link>,
+    },
+    {
+      key: '4',
       icon: <SettingOutlined />,
       label: <Link to="/settings">系统设置</Link>,
     },
@@ -98,7 +105,7 @@ function App() {
         style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)' }}
       >
         <div className="p-4" style={{ textAlign: 'left' }}>
-          <h1 className="text-xl font-bold">Go Web MVC</h1>
+          <h2 className="text-2xl  font-bold">学生管理系统</h2>
         </div>
         <Menu
           theme="light"
@@ -124,11 +131,7 @@ function App() {
               )}
             </div>
             <div className="flex items-center">
-              <Tooltip title="消息通知">
-                <Badge count={5} size="small">
-                  <BellOutlined style={{ fontSize: '20px', marginRight: '24px', cursor: 'pointer' }} />
-                </Badge>
-              </Tooltip>
+            
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
                 <div className="flex items-center cursor-pointer">
                   <Avatar 

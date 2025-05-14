@@ -3,21 +3,21 @@ package utils
 import (
 	"errors"
 	"mvc-demo/config"
-	"mvc-demo/models"
+	"mvc-demo/dao/model"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
 // GenerateToken 生成JWT令牌
-func GenerateToken(user *models.User) (string, error) {
+func GenerateToken(user *model.User) (string, error) {
 	jwtConfig := config.GetJWTConfig()
 
 	// 创建Claims
 	claims := &config.JWTClaims{
-		UserID: user.ID,
+		UserID: uint(user.ID),
 		Email:  user.Email,
-		Role:   user.Role,
+		Role:   int8(user.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtConfig.TokenExpiry)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

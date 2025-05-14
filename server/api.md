@@ -246,7 +246,7 @@
     "msg": "成功",
     "data": {
       "total": 50,
-      "items": [
+      "list": [
         {
           "id": 1,
           "name": "北京大学",
@@ -411,7 +411,7 @@
     "msg": "成功",
     "data": {
       "total": 200,
-      "items": [
+      "list": [
         {
           "id": 1,
           "name": "张三",
