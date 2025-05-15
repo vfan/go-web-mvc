@@ -19,10 +19,12 @@ docker build -t mvc-demo:latest .
 
 ### 运行容器
 
+下面示例的DB_HOST=mysql,表示数据库在docker中启动，并且容器名称为mysql。
+
 ```bash
 docker run -d -p 8080:8080 \
   --name mvc-demo \
-  -e DB_HOST=10.213.202.230 \
+  -e DB_HOST=mysql \
   -e DB_PORT=3306 \
   -e DB_USER=web \
   -e DB_PASSWORD=golang@2025 \
@@ -34,6 +36,25 @@ docker run -d -p 8080:8080 \
   -e JWT_ISSUER=student-management-system \
   mvc-demo:latest
 ```
+
+
+1. 如果数据库是在本地以docker启动，可以配置network,让其它容器连接到数据库的网络，从而连接到数据库。
+
+```bash
+docker network create mvc-network
+docker run -d --name mysql --network mvc-network -e MYSQL_ROOT_PASSWORD=123456 mysql:8.0
+
+# 或者把已经启动的容器加入到这个网络,这样在go服务中，可以使用mysql容器名直接连接数据库
+docker network connect mvc-network mysql
+docker network connect mvc-network mvc-demo
+
+ 
+
+```
+
+
+
+
 
 ## 使用 Docker Compose
 
