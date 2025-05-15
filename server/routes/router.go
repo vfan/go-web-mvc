@@ -83,7 +83,6 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 				admin.POST("/universities", universityController.Create)
 				admin.PUT("/universities/:id", universityController.Update)
 				admin.DELETE("/universities/:id", universityController.Delete)
-				admin.POST("/universities/:id/restore", universityController.Restore)
 
 				// 学生管理
 				admin.POST("/students", studentController.Create)

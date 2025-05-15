@@ -18,7 +18,7 @@ const api = axios.create({
 
 // 处理未登录状态，跳转到登录页面
 const handleUnauthorized = () => {
-  localStorage.removeItem('token');
+  // 不再需要清除localStorage中的token
   localStorage.removeItem('userInfo');
   
   // 如果不在登录页，则跳转
@@ -30,11 +30,8 @@ const handleUnauthorized = () => {
 // 请求拦截器
 api.interceptors.request.use(
   config => {
-    // 可以在这里处理 token 等认证信息
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // 不再需要从localStorage获取token并添加到header中
+    // 因为cookie会自动随请求发送
     return config;
   },
   error => {

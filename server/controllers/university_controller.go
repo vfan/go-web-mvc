@@ -210,11 +210,8 @@ func (u *UniversityController) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	// 是否显示已删除记录
-	showDeleted, _ := strconv.ParseBool(c.DefaultQuery("show_deleted", "false"))
-
 	// 获取大学列表
-	universities, total, err := u.universityService.GetUniversityList(page, pageSize, showDeleted)
+	universities, total, err := u.universityService.GetUniversityList(page, pageSize)
 	if err != nil {
 		utils.InternalError(c, "获取大学列表失败: "+err.Error())
 		return
@@ -230,8 +227,6 @@ func (u *UniversityController) List(c *gin.Context) {
 			UpdatedAt: university.UpdatedAt,
 			CreatedBy: university.CreatedBy,
 			UpdatedBy: university.UpdatedBy,
-			// 添加是否已删除的标记
-			DeletedAt: university.DeletedAt,
 		})
 	}
 
@@ -268,38 +263,4 @@ func (u *UniversityController) All(c *gin.Context) {
 	}
 
 	utils.Success(c, responseList)
-}
-
-// Restore 恢复已删除的大学
-func (u *UniversityController) Restore(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		utils.ParamError(c, "无效的大学ID")
-		return
-	}
-
-	// 检查被删除的大学是否存在
-	university, err := u.universityService.GetUniversityByIDWithDeleted(id)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			utils.NotFound(c, "大学不存在")
-		} else {
-			utils.InternalError(c, "获取大学失败: "+err.Error())
-		}
-		return
-	}
-
-	// 检查大学是否已被删除
-	if university.DeletedAt.Time.IsZero() {
-		utils.BusinessError(c, "该大学未被删除，无需恢复")
-		return
-	}
-
-	// 恢复大学
-	if err := u.universityService.RestoreUniversity(id); err != nil {
-		utils.InternalError(c, "恢复大学失败: "+err.Error())
-		return
-	}
-
-	utils.SuccessWithMsg(c, "恢复成功", nil)
 }

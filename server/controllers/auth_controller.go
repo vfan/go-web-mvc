@@ -49,10 +49,61 @@ func (a *AuthController) Login(c *gin.Context) {
 	jwtConfig := config.GetJWTConfig()
 	expiresIn := int(jwtConfig.TokenExpiry.Seconds())
 
-	// 返回响应
+	// 设置HttpOnly Cookie
+	c.SetCookie(
+		"token",                         // cookie名称
+		token,                           // cookie值
+		expiresIn,                       // 过期时间（秒）
+		"/",                             // 路径
+		"",                              // 域名（空表示当前域名）
+		c.Request.URL.Scheme == "https", // 仅在HTTPS连接时启用安全标志
+		true,                            // HttpOnly, 禁止JavaScript访问
+	)
+
+	// 返回响应（不包含token，但包含其他信息）
 	utils.SuccessWithMsg(c, "登录成功", dto.LoginResponse{
-		Token:     token,
 		TokenType: "Bearer",
 		ExpiresIn: expiresIn,
+	})
+}
+
+// Logout 用户登出
+func (a *AuthController) Logout(c *gin.Context) {
+	// 清除token Cookie
+	c.SetCookie(
+		"token",                         // cookie名称
+		"",                              // cookie值设置为空
+		-1,                              // 过期时间设为负数，立即过期
+		"/",                             // 路径
+		"",                              // 域名（空表示当前域名）
+		c.Request.URL.Scheme == "https", // 仅在HTTPS连接时启用安全标志
+		true,                            // HttpOnly，禁止JavaScript访问
+	)
+
+	utils.Success(c, nil)
+}
+
+// Me 获取当前登录用户信息
+func (a *AuthController) Me(c *gin.Context) {
+	// 从上下文中获取用户ID
+	userID, exists := c.Get("user_id")
+	if !exists {
+		utils.Unauthorized(c, "未登录")
+		return
+	}
+
+	// 获取用户信息，需要将userID转换为int64类型
+	user, err := a.userService.GetUserByID(int64(userID.(uint)))
+	if err != nil {
+		utils.InternalError(c, "获取用户信息失败")
+		return
+	}
+
+	// 返回用户信息
+	utils.Success(c, map[string]interface{}{
+		"id":       user.ID,
+		"email":    user.Email,
+		"username": user.Username,
+		"role":     user.Role,
 	})
 }

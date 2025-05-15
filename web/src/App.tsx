@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import './App.css'
+import api from './utils/api'
 
 const { Header, Sider, Content } = Layout
 
@@ -38,37 +39,39 @@ function App() {
     }
   }, []);
 
-  // 获取当前选中的菜单项
-  const getSelectedKey = () => {
-    if (location.pathname === '/') return '1'
-    if (location.pathname.startsWith('/user')) return '2'
-    if (location.pathname.startsWith('/university')) return '3'
-    if (location.pathname.startsWith('/settings')) return '4'
-    return '1'
-  }
-
+  // 定义菜单项
   const items = [
     {
-      key: '1',
+      key: '/',
+      path: '/',
       icon: <HomeOutlined />,
       label: <Link to="/">首页</Link>,
     },
     {
-      key: '2',
+      key: '/user',
+      path: '/user',
       icon: <TeamOutlined />,
       label: <Link to="/user">用户管理</Link>,
     },
     {
-      key: '3',
+      key: '/university',
+      path: '/university',
       icon: <BankOutlined />,
       label: <Link to="/university">大学管理</Link>,
     },
     {
-      key: '4',
+      key: '/settings',
+      path: '/settings',
       icon: <SettingOutlined />,
       label: <Link to="/settings">系统设置</Link>,
     },
-  ]
+  ];
+
+  // 获取当前选中的菜单项的键值
+  const selectedKey = items.find(item => 
+    location.pathname === item.path || 
+    (location.pathname !== '/' && location.pathname.startsWith(item.path))
+  )?.key || '/';
 
   const userMenuItems = [
     {
@@ -81,16 +84,21 @@ function App() {
       icon: <LogoutOutlined />,
       label: '退出登录',
       onClick: () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('userInfo')
-        navigate('/login')
+        handleLogout();
       },
     },
   ]
 
   // 处理登出
-  const handleLogout = () => {
-    localStorage.removeItem('token');
+  const handleLogout = async () => {
+    try {
+      // 调用后端登出接口，清除Cookie
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('登出请求失败:', error);
+    }
+    
+    // 清除本地存储的用户信息
     localStorage.removeItem('userInfo');
     navigate('/login');
   };
@@ -110,7 +118,7 @@ function App() {
         <Menu
           theme="light"
           mode="inline"
-          selectedKeys={[getSelectedKey()]}
+          selectedKeys={[selectedKey]}
           items={items}
         />
       </Sider>

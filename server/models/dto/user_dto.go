@@ -27,7 +27,6 @@ type UserUpdateRequest struct {
 
 // 登录响应
 type LoginResponse struct {
-	Token     string `json:"token"`
 	TokenType string `json:"token_type"`
 	ExpiresIn int    `json:"expires_in"` // 过期时间，单位：秒
 }

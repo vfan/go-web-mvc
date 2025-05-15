@@ -6,10 +6,14 @@ import NotFound from '../pages/NotFound';
 import UserList from '../pages/User';
 import UniversityList from '../pages/University';
 import type { ReactNode } from 'react';
+import api from '../utils/api';
+import { useState, useEffect } from 'react';
 
-// 检查是否已登录
+// 检查是否已登录状态
 const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
+  // 我们不能直接检查Cookie，因为HttpOnly Cookie无法通过JavaScript访问
+  // 如果用户信息存在，我们假设用户已登录，实际认证会在API请求时进行
+  return !!localStorage.getItem('userInfo');
 };
 
 // 受保护的路由组件
@@ -18,9 +22,36 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  if (!isAuthenticated()) {
+  const [isChecking, setIsChecking] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // 尝试访问一个需要认证的API端点来验证登录状态
+        // 这里假设有一个 /api/auth/me 端点可以检查当前用户
+        await api.get('/auth/me');
+        setIsLoggedIn(true);
+      } catch (error) {
+        setIsLoggedIn(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // 检查中时显示简单的加载提示
+  if (isChecking) {
+    return <div>正在检查登录状态...</div>;
+  }
+
+  // 如果没有登录，重定向到登录页面
+  if (!isLoggedIn) {
     return <Navigate to="/login" />;
   }
+
   return <>{children}</>;
 };
 

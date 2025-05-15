@@ -27,9 +27,7 @@ function Login() {
       const response = await api.post<ApiResponse<LoginResponse>>('/auth/login', values);
       
       if (response.data.code === 0) {
-        // 登录成功后存储令牌
-        const loginData = response.data.data;
-        localStorage.setItem('token', loginData.token);
+        // 登录成功后只需存储用户信息，token已经在Cookie中了
         localStorage.setItem('userInfo', JSON.stringify({
           email: values.email
         }));
