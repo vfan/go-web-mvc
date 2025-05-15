@@ -34,6 +34,17 @@ func (u *UniversityController) Create(c *gin.Context) {
 		return
 	}
 
+	// 检查大学名称是否已存在（包括已软删除的记录）
+	exists, err := u.universityService.CheckUniversityNameExistsWithDeleted(req.Name)
+	if err != nil {
+		utils.InternalError(c, "检查大学名称失败: "+err.Error())
+		return
+	}
+	if exists {
+		utils.BusinessError(c, "大学名称已存在，不能创建同名大学")
+		return
+	}
+
 	// 创建大学对象
 	university := &model.University{
 		Name: req.Name,
@@ -123,6 +134,19 @@ func (u *UniversityController) Update(c *gin.Context) {
 		return
 	}
 
+	// 如果要修改名称，检查新名称是否与其他大学（包括已删除的）冲突
+	if req.Name != existingUniversity.Name {
+		exists, err := u.universityService.CheckUniversityNameExistsExcludeID(req.Name, id)
+		if err != nil {
+			utils.InternalError(c, "检查大学名称失败: "+err.Error())
+			return
+		}
+		if exists {
+			utils.BusinessError(c, "大学名称已存在，不能修改为此名称")
+			return
+		}
+	}
+
 	// 更新大学属性
 	existingUniversity.Name = req.Name
 
@@ -186,8 +210,11 @@ func (u *UniversityController) List(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
+	// 是否显示已删除记录
+	showDeleted, _ := strconv.ParseBool(c.DefaultQuery("show_deleted", "false"))
+
 	// 获取大学列表
-	universities, total, err := u.universityService.GetUniversityList(page, pageSize)
+	universities, total, err := u.universityService.GetUniversityList(page, pageSize, showDeleted)
 	if err != nil {
 		utils.InternalError(c, "获取大学列表失败: "+err.Error())
 		return
@@ -203,6 +230,8 @@ func (u *UniversityController) List(c *gin.Context) {
 			UpdatedAt: university.UpdatedAt,
 			CreatedBy: university.CreatedBy,
 			UpdatedBy: university.UpdatedBy,
+			// 添加是否已删除的标记
+			DeletedAt: university.DeletedAt,
 		})
 	}
 
@@ -239,4 +268,38 @@ func (u *UniversityController) All(c *gin.Context) {
 	}
 
 	utils.Success(c, responseList)
+}
+
+// Restore 恢复已删除的大学
+func (u *UniversityController) Restore(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		utils.ParamError(c, "无效的大学ID")
+		return
+	}
+
+	// 检查被删除的大学是否存在
+	university, err := u.universityService.GetUniversityByIDWithDeleted(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.NotFound(c, "大学不存在")
+		} else {
+			utils.InternalError(c, "获取大学失败: "+err.Error())
+		}
+		return
+	}
+
+	// 检查大学是否已被删除
+	if university.DeletedAt.Time.IsZero() {
+		utils.BusinessError(c, "该大学未被删除，无需恢复")
+		return
+	}
+
+	// 恢复大学
+	if err := u.universityService.RestoreUniversity(id); err != nil {
+		utils.InternalError(c, "恢复大学失败: "+err.Error())
+		return
+	}
+
+	utils.SuccessWithMsg(c, "恢复成功", nil)
 }

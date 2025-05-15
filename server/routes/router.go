@@ -35,6 +35,7 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 		auth := api.Group("/auth")
 		{
 			auth.POST("/login", authController.Login)
+			auth.POST("/logout", authController.Logout)
 
 			// 临时添加创建用户接口
 			auth.POST("/register", userController.Create)
@@ -44,6 +45,9 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 		authorized := api.Group("/")
 		authorized.Use(middleware.JWTAuth())
 		{
+			// 认证相关
+			authorized.GET("/auth/me", authController.Me)
+
 			// 用户路由
 			userGroup := authorized.Group("/users")
 			{
@@ -79,6 +83,7 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 				admin.POST("/universities", universityController.Create)
 				admin.PUT("/universities/:id", universityController.Update)
 				admin.DELETE("/universities/:id", universityController.Delete)
+				admin.POST("/universities/:id/restore", universityController.Restore)
 
 				// 学生管理
 				admin.POST("/students", studentController.Create)

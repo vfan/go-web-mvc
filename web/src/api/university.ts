@@ -8,6 +8,10 @@ export interface University {
   updated_at: string;
   created_by: number | null;
   updated_by: number | null;
+  deleted_at?: {
+    Time: string;
+    Valid: boolean;
+  } | null;
 }
 
 export interface UniversityListResponse {
@@ -34,10 +38,10 @@ const checkResponse = <T>(response: ApiResponse<T>): T => {
 };
 
 // 获取大学列表（分页）
-export const getUniversityList = async (page = 1, pageSize = 10) => {
+export const getUniversityList = async (page = 1, pageSize = 10, showDeleted = false) => {
   try {
     const response = await api.get<ApiResponse<UniversityListResponse>>('/universities', {
-      params: { page, page_size: pageSize }
+      params: { page, page_size: pageSize, show_deleted: showDeleted },
     });
     return checkResponse(response.data);
   } catch (error) {
@@ -97,6 +101,17 @@ export const deleteUniversity = async (id: number) => {
     return checkResponse(response.data);
   } catch (error) {
     console.error('删除大学失败:', error);
+    throw error;
+  }
+};
+
+// 恢复已删除的大学（管理员权限）
+export const restoreUniversity = async (id: number) => {
+  try {
+    const response = await api.post<ApiResponse<null>>(`/admin/universities/${id}/restore`);
+    return checkResponse(response.data);
+  } catch (error) {
+    console.error('恢复大学失败:', error);
     throw error;
   }
 }; 

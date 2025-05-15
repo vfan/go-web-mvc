@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Card, Typography, Modal, Input, Form, App } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SyncOutlined } from '@ant-design/icons';
-import { getUniversityList, createUniversity, updateUniversity, deleteUniversity } from '../../api/university';
+import { Table, Button, Space, Card, Typography, Modal, Input, Form, App, Switch, Tag } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SyncOutlined, UndoOutlined } from '@ant-design/icons';
+import { getUniversityList, createUniversity, updateUniversity, deleteUniversity, restoreUniversity } from '../../api/university';
 import type { University, UniversityCreateParams, UniversityUpdateParams } from '../../api/university';
 
 const { Title } = Typography;
@@ -15,6 +15,7 @@ function UniversityList() {
   const [currentUniversity, setCurrentUniversity] = useState<University | null>(null);
   const [form] = Form.useForm();
   const [searchText, setSearchText] = useState('');
+  const [showDeleted, setShowDeleted] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -25,7 +26,7 @@ function UniversityList() {
   const fetchUniversities = async (page = 1, pageSize = 10) => {
     setLoading(true);
     try {
-      const response = await getUniversityList(page, pageSize);
+      const response = await getUniversityList(page, pageSize, showDeleted);
       console.log(response.list);
       setUniversities(response.list || []);
       setPagination({
@@ -44,7 +45,7 @@ function UniversityList() {
   // 初始加载
   useEffect(() => {
     fetchUniversities(pagination.current, pagination.pageSize);
-  }, []);
+  }, [showDeleted]); // 当showDeleted状态改变时重新加载
 
   // 处理表格分页变化
   const handleTableChange = (pagination: any) => {
@@ -125,6 +126,28 @@ function UniversityList() {
     });
   };
 
+  // 处理恢复大学
+  const handleRestoreUniversity = (id: number) => {
+    modal.confirm({
+      title: '确认恢复',
+      icon: <ExclamationCircleOutlined />,
+      content: '您确定要恢复此大学吗？',
+      onOk: async () => {
+        try {
+          await restoreUniversity(id);
+          message.success('大学已恢复');
+          fetchUniversities(pagination.current, pagination.pageSize);
+        } catch (error) {
+          if (error instanceof Error) {
+            message.error(`恢复大学失败: ${error.message}`);
+          } else {
+            message.error('恢复大学失败，请重试');
+          }
+        }
+      },
+    });
+  };
+
   // 打开编辑模态框
   const handleEditClick = (university: University) => {
     setCurrentUniversity(university);
@@ -152,6 +175,16 @@ function UniversityList() {
     fetchUniversities(pagination.current, pagination.pageSize);
   };
 
+  // 切换显示已删除记录
+  const handleShowDeletedChange = (checked: boolean) => {
+    setShowDeleted(checked);
+    // 切换后重置到第一页
+    setPagination({
+      ...pagination,
+      current: 1
+    });
+  };
+
   // 表格列定义
   const columns = [
     {
@@ -163,40 +196,63 @@ function UniversityList() {
       title: '大学名称',
       dataIndex: 'name',
       key: 'name',
+      render: (name: string, record: University) => (
+        <span>
+          {name} 
+          {record.deleted_at && !record.deleted_at.Time ? null : (
+            <Tag color="red" className="ml-2">已删除</Tag>
+          )}
+        </span>
+      ),
     },
     {
       title: '创建时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (time: string) => new Date(time).toLocaleString(),
+      render: (time: string) => time ? new Date(time).toLocaleString() : '-',
     },
     {
       title: '更新时间',
       dataIndex: 'updated_at',
       key: 'updated_at',
-      render: (time: string) => new Date(time).toLocaleString(),
+      render: (time: string) => time ? new Date(time).toLocaleString() : '-',
     },
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: University) => (
-        <Space size="middle">
-          <Button 
-            type="primary" 
-            icon={<EditOutlined />} 
-            onClick={() => handleEditClick(record)}
-          >
-            编辑
-          </Button>
-          <Button 
-            danger 
-            icon={<DeleteOutlined />} 
-            onClick={() => handleDeleteUniversity(record.id)}
-          >
-            删除
-          </Button>
-        </Space>
-      ),
+      render: (_: any, record: University) => {
+        // 根据是否删除显示不同的操作按钮
+        if (record.deleted_at && record.deleted_at.Valid) {
+          return (
+            <Button 
+              type="primary" 
+              icon={<UndoOutlined />} 
+              onClick={() => handleRestoreUniversity(record.id)}
+            >
+              恢复
+            </Button>
+          );
+        }
+        
+        return (
+          <Space size="middle">
+            <Button 
+              type="primary" 
+              icon={<EditOutlined />} 
+              onClick={() => handleEditClick(record)}
+            >
+              编辑
+            </Button>
+            <Button 
+              danger 
+              icon={<DeleteOutlined />} 
+              onClick={() => handleDeleteUniversity(record.id)}
+            >
+              删除
+            </Button>
+          </Space>
+        );
+      },
     },
   ];
 
@@ -205,7 +261,7 @@ function UniversityList() {
       <Title level={2}>大学管理</Title>
       
       <div className="flex justify-between mb-4">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Search
             placeholder="搜索大学名称"
             allowClear
@@ -219,6 +275,14 @@ function UniversityList() {
           >
             刷新
           </Button>
+          <div className="ml-4 flex items-center">
+            <Switch 
+              checked={showDeleted} 
+              onChange={handleShowDeletedChange} 
+              className="mr-2"
+            />
+            <span>显示已删除记录</span>
+          </div>
         </div>
         <Button 
           type="primary" 
@@ -248,20 +312,17 @@ function UniversityList() {
         open={isModalVisible}
         onOk={handleAddOrEditUniversity}
         onCancel={handleModalCancel}
-        okText={currentUniversity ? '更新' : '添加'}
-        cancelText="取消"
       >
         <Form
           form={form}
           layout="vertical"
-          name="universityForm"
         >
           <Form.Item
             name="name"
             label="大学名称"
             rules={[{ required: true, message: '请输入大学名称' }]}
           >
-            <Input placeholder="请输入大学名称" />
+            <Input />
           </Form.Item>
         </Form>
       </Modal>

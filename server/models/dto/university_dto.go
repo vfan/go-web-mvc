@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // 大学请求
 type UniversityRequest struct {
@@ -9,12 +13,13 @@ type UniversityRequest struct {
 
 // 大学响应
 type UniversityResponse struct {
-	ID        int64      `json:"id"`
-	Name      string     `json:"name"`
-	CreatedAt *time.Time `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
-	CreatedBy *int64     `json:"created_by"`
-	UpdatedBy *int64     `json:"updated_by"`
+	ID        int64          `json:"id"`
+	Name      string         `json:"name"`
+	CreatedAt *time.Time     `json:"created_at"`
+	UpdatedAt *time.Time     `json:"updated_at"`
+	CreatedBy *int64         `json:"created_by"`
+	UpdatedBy *int64         `json:"updated_by"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty"`
 }
 
 // 大学列表响应
