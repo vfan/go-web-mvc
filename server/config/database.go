@@ -1,4 +1,4 @@
-package models
+package config
 
 import (
 	"fmt"
@@ -9,8 +9,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-
-	"mvc-demo/config"
 )
 
 var DB *gorm.DB
@@ -18,7 +16,7 @@ var DB *gorm.DB
 // 初始化数据库连接
 func InitDB() {
 	var err error
-	appConfig := config.GetConfig()
+	appConfig := GetConfig()
 	dbConfig := appConfig.DB
 
 	// 构建DSN (Data Source Name)
@@ -71,21 +69,7 @@ func InitDB() {
 	// 这确保了数据库结构变更的可追踪性、安全性和一致性
 }
 
-// 以下是数据库迁移代码，仅供参考，不再自动执行
-// 在实际生产环境中，应使用专门的数据库迁移工具，如 golang-migrate、atlas 等
-
-// migrateModels 自动迁移模型到数据库 (仅供开发环境参考)
-func migrateModels() {
-	// 根据模型自动迁移数据库表结构
-	err := DB.AutoMigrate(
-		&User{},
-		&University{},
-		&Student{},
-	)
-
-	if err != nil {
-		log.Fatalf("自动迁移数据库失败: %v", err)
-	}
-
-	log.Println("数据库迁移完成")
+// 获取数据库连接实例
+func GetDB() *gorm.DB {
+	return DB
 }
