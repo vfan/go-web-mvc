@@ -1,54 +1,113 @@
-# React + TypeScript + Vite
+# Go-Web-MVC 前端项目
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+本项目是一个基于React + TypeScript + Vite的前端应用，作为Go-Web-MVC全栈项目的前端部分。这是一个教学项目，旨在展示基于MVC架构的全栈Web应用开发。
 
-Currently, two official plugins are available:
+## 项目架构
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+本前端项目使用以下技术栈：
 
-## Expanding the ESLint configuration
+- **React**: 用于构建用户界面的JavaScript库
+- **TypeScript**: 添加静态类型系统，提高代码质量和开发体验
+- **Vite**: 下一代前端构建工具，提供极速的开发服务器和优化的构建
+- **Ant Design (antd)**: 企业级UI组件库
+- **Tailwind CSS**: 实用优先的CSS框架
+- **Axios**: 基于Promise的HTTP客户端，用于发送Ajax请求
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 目录结构
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+web/
+├── public/              # 静态资源目录
+├── src/                 # 源代码目录
+│   ├── api/             # API请求相关
+│   ├── assets/          # 静态资源
+│   ├── components/      # 可复用组件
+│   ├── hooks/           # 自定义React Hooks
+│   ├── layouts/         # 布局组件
+│   ├── pages/           # 页面组件
+│   ├── store/           # 状态管理
+│   ├── types/           # TypeScript类型定义
+│   ├── utils/           # 工具函数
+│   ├── App.tsx          # 应用入口组件
+│   ├── main.tsx         # 应用入口文件
+│   └── vite-env.d.ts    # Vite类型声明
+├── .eslintrc.cjs        # ESLint配置
+├── index.html           # HTML模板
+├── package.json         # 项目依赖和脚本
+├── tsconfig.json        # TypeScript配置
+├── tailwind.config.js   # Tailwind CSS配置
+└── vite.config.ts       # Vite配置
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 运行项目
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### 安装依赖
+
+```bash
+cd web
+npm install
+# 或
+yarn
 ```
+
+### 开发环境运行
+
+```bash
+npm run dev
+# 或
+yarn dev
+```
+
+这将启动开发服务器，通常在 http://localhost:5173 可以访问。
+
+### 构建生产版本
+
+```bash
+npm run build
+# 或
+yarn build
+```
+
+构建后的文件将位于 `dist` 目录中。
+
+## 后端API交互
+
+本项目前端通过Axios与后端API进行交互，后端API文档位于服务器端项目中的 `server/api.md`。
+
+开发阶段，使用代理转发请求，在 `vite.config.ts` 中配置代理。因此开发阶段，需要启动后端服务。
+
+```ts
+server: {
+  proxy: {
+    '/api': 'http://localhost:8080'
+  }
+}
+```
+
+  - `code`: 0表示成功，小于0表示错误
+  - `msg`: 错误信息
+  - `data`: 返回的数据
+
+## 开发指南
+
+### 添加新页面
+
+1. 在 `src/pages` 目录下创建新页面组件
+2. 在路由配置中添加新路由
+3. 根据需要添加相应的API请求函数
+
+### 添加新组件
+
+1. 在 `src/components` 目录下创建新组件
+2. 组件应遵循项目的样式和代码规范
+3. 为组件添加适当的TypeScript类型定义
+
+## 学习资源
+
+- [React文档](https://react.dev/)
+- [TypeScript文档](https://www.typescriptlang.org/docs/)
+- [Vite文档](https://vitejs.dev/guide/)
+- [Ant Design文档](https://ant.design/docs/react/introduce-cn)
+- [Tailwind CSS文档](https://tailwindcss.com/docs)
+- [Axios文档](https://axios-http.com/docs/intro)

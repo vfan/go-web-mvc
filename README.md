@@ -44,11 +44,7 @@
 ### 数据库配置
 
 1. 确保已安装MySQL数据库
-2. 使用`server/db/db.sql`文件创建数据库和表结构：
-
-```bash
-mysql -u your_username -p < server/db/db.sql
-```
+2. 使用`server/db/db.sql`文件创建数据库和表结构。
 
 ### 后端运行
 
