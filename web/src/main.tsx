@@ -14,9 +14,7 @@ message.config({
 });
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <AntdApp>
       <Router />
     </AntdApp>
-  </StrictMode>,
 )
