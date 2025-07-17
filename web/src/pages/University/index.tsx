@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Table, Button, Space, Card, Typography, Modal, Input, Form, App } from 'antd';
+import { Table, Button, Space, Typography, Modal, Input, Form, App } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { getUniversityList, createUniversity, updateUniversity, deleteUniversity } from '../../api/university';
 import type { University, UniversityCreateParams, UniversityUpdateParams } from '../../api/university';
@@ -47,8 +47,8 @@ function UniversityList() {
   }, []);
 
   // 处理表格分页变化
-  const handleTableChange = (pagination: any) => {
-    fetchUniversities(pagination.current, pagination.pageSize);
+  const handleTableChange = (pagination: { current?: number; pageSize?: number }) => {
+    fetchUniversities(pagination.current || 1, pagination.pageSize || 10);
   };
 
   // 根据搜索文本过滤大学
@@ -92,7 +92,7 @@ function UniversityList() {
 
   // 处理添加/编辑表单提交
   const handleAddOrEditUniversity = () => {
-    form.validateFields().then(values => {
+    form.validateFields().then((values: UniversityCreateParams) => {
       if (currentUniversity) {
         // 编辑现有大学
         handleEditUniversity(currentUniversity.id, values);
@@ -179,7 +179,7 @@ function UniversityList() {
     {
       title: '操作',
       key: 'action',
-      render: (_: any, record: University) => (
+      render: (_: unknown, record: University) => (
         <Space size="middle">
           <Button 
             type="primary" 
@@ -210,8 +210,8 @@ function UniversityList() {
             placeholder="搜索大学名称"
             allowClear
             style={{ width: 300 }}
-            onSearch={value => setSearchText(value)}
-            onChange={e => setSearchText(e.target.value)}
+            onSearch={(value: string) => setSearchText(value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
           />
           <Button 
             icon={<SyncOutlined />} 
@@ -237,7 +237,7 @@ function UniversityList() {
           ...pagination,
           showSizeChanger: true,
           showQuickJumper: true,
-          showTotal: (total) => `共 ${total} 条记录`
+          showTotal: (total: number) => `共 ${total} 条记录`
         }}
         loading={loading}
         onChange={handleTableChange}

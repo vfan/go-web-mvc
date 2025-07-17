@@ -1,5 +1,4 @@
 import api from '../utils/api';
-import { message } from 'antd';
 import type { ApiResponse } from '../utils/api';
 
 export interface User {

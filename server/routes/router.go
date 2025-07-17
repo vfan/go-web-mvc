@@ -38,7 +38,7 @@ func SetupRouter(deps AppDependencies) *gin.Engine {
 			auth.POST("/logout", authController.Logout)
 
 			// 临时添加创建用户接口
-			//auth.POST("/register", userController.Create)
+			auth.POST("/register", userController.Create)
 		}
 
 		// 需要认证的路由

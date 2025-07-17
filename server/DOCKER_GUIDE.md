@@ -97,24 +97,3 @@ docker-compose down -v
 | JWT_SECRET | JWT密钥 | - |
 | JWT_EXPIRES | JWT过期时间 | 24h |
 
-## CI/CD 集成
-
-在 CI/CD 流程中，可以使用以下命令构建和推送 Docker 镜像到镜像仓库：
-
-```bash
-# 登录到镜像仓库
-docker login $REGISTRY_URL -u $REGISTRY_USER -p $REGISTRY_PASSWORD
-
-# 构建镜像
-docker build -t $REGISTRY_URL/mvc-demo:$VERSION .
-
-# 推送镜像
-docker push $REGISTRY_URL/mvc-demo:$VERSION
-```
-
-## 生产环境注意事项
-
-1. 在生产环境中，建议将敏感配置（如数据库密码）通过环境变量或安全的配置管理工具提供，而不是硬编码在配置文件中。
-2. 设置 GIN_MODE=release 以禁用调试功能并提高性能。
-3. 考虑使用外部数据库服务而不是容器化的数据库，以确保数据持久性和备份。
-4. 实现健康检查和监控，确保服务可用性。 

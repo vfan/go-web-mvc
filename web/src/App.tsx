@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Layout, Menu, Avatar, Dropdown, theme, Badge, Tooltip } from 'antd'
+import { Layout, Menu, Avatar, Dropdown, theme } from 'antd'
 import { 
   UserOutlined, 
   MenuFoldOutlined, 
   MenuUnfoldOutlined, 
   HomeOutlined,
   TeamOutlined,
-  SettingOutlined,
-  BellOutlined,
+  SettingOutlined,  
   LogoutOutlined,
   BankOutlined
 } from '@ant-design/icons'
@@ -23,7 +22,7 @@ function App() {
   const navigate = useNavigate()
   const location = useLocation()
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken()
 
   // 获取用户信息
@@ -64,6 +63,12 @@ function App() {
       path: '/settings',
       icon: <SettingOutlined />,
       label: <Link to="/settings">系统设置</Link>,
+    },
+    {
+      key: '/router',
+      path: '/router',
+      icon: <SettingOutlined />,
+      label: <Link to="/router">路由管理</Link>,
     },
   ];
 
@@ -157,11 +162,12 @@ function App() {
             margin: '24px 16px',
             padding: 24,
             background: colorBgContainer,
-            borderRadius: borderRadiusLG,
+            borderRadius: 8,
             minHeight: 280,
             overflow: 'auto'
           }}
         >
+          <div>Hello router</div>
           <Outlet />
         </Content>
       </Layout>

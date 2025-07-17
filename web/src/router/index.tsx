@@ -1,20 +1,17 @@
-import { createBrowserRouter,createHashRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createHashRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
+
 import App from '../App';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
 import UserList from '../pages/User';
 import UniversityList from '../pages/University';
-import type { ReactNode } from 'react';
 import api from '../utils/api';
-import { useState, useEffect } from 'react';
+import RouterDemo from '../pages/RouterDemo/Demo';
 
-// 检查是否已登录状态
-const isAuthenticated = () => {
-  // 我们不能直接检查Cookie，因为HttpOnly Cookie无法通过JavaScript访问
-  // 如果用户信息存在，我们假设用户已登录，实际认证会在API请求时进行
-  return !!localStorage.getItem('userInfo');
-};
+
 
 // 受保护的路由组件
 interface ProtectedRouteProps {
@@ -32,7 +29,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         // 这里假设有一个 /api/auth/me 端点可以检查当前用户
         await api.get('/auth/me');
         setIsLoggedIn(true);
-      } catch (error) {
+      } catch {
         setIsLoggedIn(false);
       } finally {
         setIsChecking(false);
@@ -94,6 +91,10 @@ const router = createHashRouter([
       {
         path: 'settings',
         element: <Settings />,
+      },
+      {
+        path: 'router',
+        element: <RouterDemo />,
       },
       {
         path: '*',

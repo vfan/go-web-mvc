@@ -108,7 +108,7 @@ function UserList() {
 
   // 处理添加/编辑表单提交
   const handleAddOrEditUser = () => {
-    form.validateFields().then(values => {
+    form.validateFields().then((values: any) => {
       if (currentUser) {
         // 编辑现有用户
         handleEditUser(currentUser.id, values);
@@ -247,8 +247,8 @@ function UserList() {
             placeholder="搜索邮箱"
             allowClear
             style={{ width: 300 }}
-            onSearch={value => setSearchText(value)}
-            onChange={e => setSearchText(e.target.value)}
+            onSearch={(value: string) => setSearchText(value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
           />
           <Button 
             icon={<SyncOutlined />} 
@@ -275,7 +275,7 @@ function UserList() {
           pagination={{
             ...pagination,
             showSizeChanger: true,
-            showTotal: (total) => `共 ${total} 条记录`
+            showTotal: (total: number) => `共 ${total} 条记录`
           }}
           onChange={handleTableChange}
         />
