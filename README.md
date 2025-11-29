@@ -175,6 +175,39 @@ npm run dev
 
 默认情况下，前端开发服务器将在`http://localhost:5173`上运行，同时 vite会将 /api请求转发到后端服务也就是8080端口。
 
+### 开发环境代理流程图 (Mermaid)
+
+```mermaid
+graph LR
+    Browser[💻 浏览器]
+    
+    subgraph DevEnvironment [开发环境]
+        Vite[⚡ Vite Dev Server]
+        GoServer[🐹 Go API Server]
+    end
+    
+    DB[(🐬 MySQL)]
+
+    %% 连接关系
+    Browser -- "1. http://localhost:5173" --> Vite
+    
+    Vite -- "2. 页面/静态资源" --> Browser
+    
+    Browser -- "3. AJAX /api/..." --> Vite
+    
+    Vite -- "4. Proxy 转发 (vite.config.ts)" --> GoServer
+    
+    GoServer -- "5. SQL 查询" --> DB
+    DB -- "6. 数据返回" --> GoServer
+    
+    GoServer -- "7. JSON 响应" --> Vite
+    Vite -- "8. 转发响应" --> Browser
+
+    %% 样式
+    style Vite fill:#ff9,stroke:#333,stroke-width:2px
+    style GoServer fill:#bfb,stroke:#333,stroke-width:2px
+```
+
 ## Docker部署
 
 本项目支持通过Docker进行部署，包含前端、后端和MySQL数据库服务。

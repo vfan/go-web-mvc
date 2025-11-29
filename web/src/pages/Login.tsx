@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Input, Button, message, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import type { ApiResponse } from '../utils/api';
 
@@ -99,6 +99,12 @@ function Login() {
                 登录
               </Button>
             </Form.Item>
+            
+            <div className="text-center">
+              <Link to="/register" className="text-indigo-600 hover:text-indigo-800">
+                没有账号？立即注册
+              </Link>
+            </div>
           </Form>
         </Card>
         

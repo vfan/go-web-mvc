@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import App from '../App';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
+import Register from '../pages/Register';
 import NotFound from '../pages/NotFound';
 import UserList from '../pages/User';
 import UniversityList from '../pages/University';
@@ -66,6 +67,10 @@ const router = createHashRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/register',
+    element: <Register />,
   },
   // 使用App布局的页面（需要登录）
   {

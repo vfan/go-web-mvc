@@ -25,7 +25,7 @@ services:
       - DB_PORT=3306
       - DB_USER=root
       - DB_PASSWORD=password
-      - DB_NAME=go_web_mvc
+      - DB_NAME=student_management
     depends_on:
       - mysql
     networks:
