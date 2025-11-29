@@ -39,6 +39,89 @@
 └── README.md           # 项目说明文档
 ```
 
+## 系统交互流程图
+
+### 请求处理流程图 (Mermaid)
+
+```mermaid
+graph TD
+    User[👤 用户浏览器]
+    
+    subgraph Docker Host [宿主机/开发环境]
+        P80[端口 80]
+        P8080[端口 8080]
+    end
+
+    subgraph Docker Network [Docker 内部网络]
+        subgraph WebContainer [前端容器 (Nginx)]
+            Nginx[Nginx 服务器]
+            StaticFiles[静态资源 (HTML/JS/CSS)]
+        end
+        
+        subgraph ServerContainer [后端容器 (Go API)]
+            GinServer[Gin Web Server]
+            Logic[业务逻辑层]
+        end
+        
+        subgraph DBContainer [数据库容器 (MySQL)]
+            MySQL[(MySQL 数据库)]
+        end
+    end
+
+    %% 流程连线
+    User -- "1. 访问 http://localhost" --> P80
+    P80 -- "端口映射" --> Nginx
+    
+    Nginx -- "2. 路径 / (非API请求)" --> StaticFiles
+    StaticFiles -.-> |"返回页面/JS/CSS"| User
+    
+    User -- "3. 发起请求 /api/..." --> P80
+    P80 --> Nginx
+    
+    Nginx -- "4. 转发 (proxy_pass)" --> GinServer
+    GinServer --> Logic
+    Logic -- "5. 读写数据" --> MySQL
+    MySQL -.-> |"返回数据"| Logic
+    Logic -.-> |"返回 JSON"| Nginx
+    Nginx -.-> |"响应 API 结果"| User
+
+    %% 样式
+    style User fill:#f9f,stroke:#333,stroke-width:2px
+    style Nginx fill:#bbf,stroke:#333,stroke-width:2px
+    style GinServer fill:#bfb,stroke:#333,stroke-width:2px
+    style MySQL fill:#ff9,stroke:#333,stroke-width:2px
+```
+
+### 详细时序图 (Mermaid)
+
+```mermaid
+sequenceDiagram
+    participant User as 👤 用户/浏览器
+    participant Nginx as 🐳 Nginx (前端容器)
+    participant Go as 🐹 Go Server (后端容器)
+    participant DB as 🐬 MySQL (数据库容器)
+
+    Note over User, Nginx: 场景 1: 加载页面
+    User->>Nginx: GET / (访问首页)
+    Nginx-->>User: 返回 index.html
+    User->>Nginx: GET /assets/index.js
+    Nginx-->>User: 返回 JS 文件
+
+    Note over User, DB: 场景 2: 业务操作 (例如获取用户列表)
+    User->>Nginx: GET /api/users (AJAX请求)
+    Note right of Nginx: 匹配 location /api/
+    Nginx->>Go: 转发请求 http://server:8080/api/users
+    Go->>DB: SQL 查询 (SELECT * FROM users)
+    DB-->>Go: 返回结果集
+    Go-->>Nginx: 返回 JSON 数据 {code:0, data:[...]}
+    Nginx-->>User: 转发响应 JSON
+
+    Note over User, Nginx: 场景 3: SPA 前端路由
+    User->>Nginx: GET /user/profile (刷新页面)
+    Note right of Nginx: 路径不存在，try_files 回退
+    Nginx-->>User: 返回 index.html (React 接管路由)
+```
+
 ## 如何运行
 
 ### 数据库配置

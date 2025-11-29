@@ -35,5 +35,9 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-arm64-musl": "*",
+    "lightningcss-linux-arm64-musl": "*"
   }
 }
