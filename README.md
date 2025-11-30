@@ -93,7 +93,19 @@ npm run dev
 
 默认情况下，前端开发服务器将在`http://localhost:5173`上运行，同时 vite会将 /api请求转发到后端服务也就是8080端口。
 
-### 开发环境代理流程图 (开发环境：本地)
+见vite.config.ts文件 proxy配置。
+
+```tsx
+```ts
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+  },
+```
+
+### 开发环境代理流程图 (开发环境：本地，开发环境：Docker容器)
 
 ```mermaid
 graph LR
