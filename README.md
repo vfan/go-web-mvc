@@ -223,6 +223,14 @@ sequenceDiagram
     Nginx-->>User: 返回 index.html (React 接管路由)
 ```
 
+### 关于静态资源托管的替代方案
+ 在生产环境中，你也可以选择直接使用 Gin 框架处理静态资源文件（不使用 Nginx，所有请求直接转到后端服务），参考官方文档 [Serving static files](https://gin-gonic.com/en/docs/examples/serving-static-files/)。
+ **但一般不推荐**，原因如下：
+ - 因为 Nginx 在处理静态资源缓存、压缩和并发方面性能更好。
+ - 前后端分离项目，前后端是独立部署与发布的，前端静态资源(js/css/图片等)通常放在CDN上，所以Nginx作为静态资源服务器(主要处理html，以及作为cdn源站)，以及负责API请求转发。
+
+> 当然随着AI及全栈的发展，这也是一种架构的选择。
+
 
 ### 使用Docker Compose部署整个应用
 
@@ -257,6 +265,7 @@ docker run -p 80:80 go-web-mvc-frontend
 - Nginx配置已处理SPA前端路由问题
 - API请求将被自动转发到后端服务
 - 可以根据实际部署环境修改web/nginx.conf中的API转发配置
+
 
 ## API文档
 
