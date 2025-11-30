@@ -95,7 +95,6 @@ npm run dev
 
 见vite.config.ts文件 proxy配置。
 
-```tsx
 ```ts
   proxy: {
     '/api': {
@@ -113,7 +112,7 @@ graph LR
     
     subgraph DevEnvironment ["开发环境"]
         Vite[⚡ Vite Dev Server]
-        GoServer[🐹 Go API Server]
+        GoServer[🐹 Go API Server:8080端口]
     end
     
     DB[(🐬 MySQL)]
@@ -121,9 +120,9 @@ graph LR
     %% 连接关系
     Browser -- "1. http://localhost:5173" --> Vite
     
-    Vite -- "2. 页面/静态资源" --> Browser
+    Vite -- "2. 页面/静态资源直接返回" --> Browser
     
-    Browser -- "3. AJAX /api/..." --> Vite
+    Browser -- "3. AJAX /api/...请求转发到后端服务8080端口" --> Vite
     
     Vite -- "4. Proxy 转发 (vite.config.ts)" --> GoServer
     
