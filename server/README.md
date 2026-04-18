@@ -104,7 +104,7 @@ func (a *AuthController) Login(c *gin.Context) {
     // 验证用户是否存在且密码正确
     user, err := a.userService.Login(req.Email, req.Password)
     if err != nil {
-        utils.Unauthorized(c, "用户名或密码错误")
+        utils.Unauthorized(c, "邮箱或密码错误")
         return
     }
     

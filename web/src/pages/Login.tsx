@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Form, Input, Button, message, Card } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import type { ApiResponse } from '../utils/api';
 
 interface LoginResponse {
-  token: string;
   token_type: string;
   expires_in: number;
 }
@@ -53,39 +52,47 @@ function Login() {
           <p className="text-gray-600 mt-2">请登录以继续使用</p>
         </div>
         
-        <Card className="w-full shadow-lg rounded-lg border-0" style={{ maxWidth: '320px', margin: '0 auto' }}>
-          <h2 className="text-center text-2xl font-semibold mb-6 text-gray-700">用户登录</h2>
+        <Card className="w-full shadow-lg rounded-lg border-0" style={{ maxWidth: '360px', margin: '0 auto' }}>
+          <h2 className="text-center text-2xl font-semibold mb-2 text-gray-700">用户登录</h2>
+          <p className="text-center text-sm text-gray-500 mb-6 px-1 leading-relaxed">
+            请使用<strong className="text-gray-700 font-medium">注册邮箱</strong>登录（不支持用户名）
+          </p>
           <Form
             name="login"
             initialValues={{ remember: true }}
             onFinish={onFinish}
             layout="vertical"
             size="large"
-            style={{ maxWidth: '280px', margin: '0 auto' }}
+            style={{ maxWidth: '320px', margin: '0 auto' }}
           >
             <Form.Item
+              label={<span className="text-gray-700 font-medium">邮箱</span>}
               name="email"
               rules={[
                 { required: true, message: '请输入邮箱' },
                 { type: 'email', message: '请输入有效的邮箱地址' }
               ]}
             >
-              <Input 
-                prefix={<UserOutlined className="text-gray-400" />} 
-                placeholder="邮箱"
+              <Input
+                prefix={<MailOutlined className="text-gray-400" />}
+                placeholder="例如：zhangsan@example.com"
+                autoComplete="email"
+                inputMode="email"
                 className="rounded-md"
-                style={{ width: '100%', maxWidth: '280px' }}
+                style={{ width: '100%' }}
               />
             </Form.Item>
             <Form.Item
+              label={<span className="text-gray-700 font-medium">密码</span>}
               name="password"
               rules={[{ required: true, message: '请输入密码' }]}
             >
-              <Input.Password 
-                prefix={<LockOutlined className="text-gray-400" />} 
-                placeholder="密码"
+              <Input.Password
+                prefix={<LockOutlined className="text-gray-400" />}
+                placeholder="请输入登录密码"
+                autoComplete="current-password"
                 className="rounded-md"
-                style={{ width: '100%', maxWidth: '280px' }}
+                style={{ width: '100%' }}
               />
             </Form.Item>
             <Form.Item className="mt-6">
