@@ -334,5 +334,8 @@ go run cmd/gen.go
 8. 测试新功能
 9. 提交代码
 
- 
+## Docker
+
+仅构建或运行**后端镜像**（与 Docker 内 MySQL 联调等）的步骤见同目录下的 [`DOCKER_GUIDE.md`](DOCKER_GUIDE.md)。  
+前端、后端、数据库一起启动请使用仓库根目录的 `docker-compose.yml`，说明见根目录 [`README.md`](../README.md) 中的「Docker 部署」章节。
 

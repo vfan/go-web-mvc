@@ -20,18 +20,23 @@
 
 ```
 .
+├── docker-compose.yml  # 编排：前端(Nginx)+后端(Go)+MySQL
 ├── server/             # 后端项目目录
+│   ├── Dockerfile      # 后端镜像构建
+│   ├── DOCKER_GUIDE.md # 仅后端镜像构建/运行说明（教学向）
 │   ├── controllers/    # 控制器层
 │   ├── models/         # 模型层
 │   ├── services/       # 服务层
 │   ├── routes/         # 路由配置
-│   ├── middlewares/    # 中间件
-│   ├── db/             # 数据库相关
+│   ├── middleware/     # 中间件
+│   ├── db/             # 数据库相关（含初始化 SQL）
 │   ├── utils/          # 工具函数
 │   ├── .env            # 环境配置文件
 │   └── .env.local      # 本地环境配置文件（优先级更高）
 │
 ├── web/                # 前端项目目录
+│   ├── Dockerfile      # 前端镜像（构建产物 + Nginx）
+│   ├── nginx.conf      # 生产环境 Nginx（API 转发至后端服务名 server）
 │   ├── src/            # 源代码
 │   ├── public/         # 静态资源
 │   └── package.json    # 依赖配置
@@ -234,22 +239,55 @@ sequenceDiagram
 
 ### 使用Docker Compose部署整个应用
 
-1. 确保已安装Docker和Docker Compose
+1. 确保已安装 Docker 与 Docker Compose（Compose V2 可使用 `docker compose` 命令）。
 
-2. 在项目根目录下执行：
+2. 在**仓库根目录**（与 `docker-compose.yml` 同级）执行：
 
 ```bash
 docker-compose up -d
 ```
+
+后端 Docker 的单独构建与说明另见 `server/DOCKER_GUIDE.md`。
 
 这将启动三个服务:
 - 前端服务 (Nginx托管的React应用)：http://localhost
 - 后端服务 (Go API服务)：http://localhost:8080
 - MySQL数据库服务
 
+#### Compose 服务与端口一览
+
+| Compose 服务名 | 容器内角色 | 宿主机端口 |
+|----------------|------------|------------|
+| `web` | Nginx + 前端静态资源 | **80** |
+| `server` | Gin API | **8080** |
+| `mysql` | MySQL 8 | **3306** |
+
+默认数据库：`student_management`，root 密码与编排文件中 `MYSQL_ROOT_PASSWORD`、后端的 `DB_PASSWORD` 一致（当前示例为 `123456`）。**生产环境请务必改为强密码并在编排或密钥管理中注入。**
+
+### 常用运维命令与排查
+
+```bash
+# 查看日志（在项目根目录）
+docker compose logs -f
+docker compose logs -f server
+
+# 修改 Dockerfile 或依赖后强制重建镜像再启动
+docker compose up -d --build
+
+# 清理编排创建的容器与网络（数据卷可选保留）
+docker compose down
+
+# 同时删掉 MySQL 数据卷（慎用：库内数据清空）
+docker compose down -v
+```
+
+若 **80 端口被占用**，可临时改为例如 `"8081:80"`（改 `docker-compose.yml` 中 `web` 的 `ports`），浏览器访问 `http://localhost:8081`。
+
+后端启动失败多为 **数据库未就绪或账号密码不一致**：可看 `docker compose logs server`，并对比 `mysql` 与 `server` 的环境变量是否与 `docker-compose.yml` 一致。
+
 ### 单独构建前端Docker镜像
 
-如果只需要构建前端Docker镜像：
+如果只需要构建前端 Docker 镜像：
 
 ```bash
 cd web
@@ -257,14 +295,14 @@ docker build -t go-web-mvc-frontend .
 docker run -p 80:80 go-web-mvc-frontend
 ```
 
-前端应用将通过Nginx在http://localhost上提供服务。
+前端应用将通过 Nginx 在 `http://localhost` 上提供静态页。**注意**：当前 `web/nginx.conf` 将 `/api/` 转发到 `http://server:8080`，该主机名仅在 **Compose 编排或同一自定义网络上的后端容器** 中存在。若只起一个前端容器而没有同名后端容器，浏览器请求 API 会失败；此时需要同时运行后端（或改用 `host.docker.internal` 等方式指向宿主机后端，详见 Docker 文档）。
 
 ### 注意事项
 
-- 前端Docker配置使用Nginx作为Web服务器
-- Nginx配置已处理SPA前端路由问题
-- API请求将被自动转发到后端服务
-- 可以根据实际部署环境修改web/nginx.conf中的API转发配置
+- 前端 Docker 配置使用 Nginx 作为 Web 服务器
+- Nginx 配置已处理 SPA 前端路由问题
+- `/api/` 请求由 Nginx 反向代理到后端 Compose 服务名 **`server`**（端口 8080）
+- 可根据实际部署修改 `web/nginx.conf` 中的 `proxy_pass`
 
 
 ## API文档

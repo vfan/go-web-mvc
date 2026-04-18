@@ -24,7 +24,7 @@ services:
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_USER=root
-      - DB_PASSWORD=password
+      - DB_PASSWORD=123456
       - DB_NAME=student_management
     depends_on:
       - mysql
