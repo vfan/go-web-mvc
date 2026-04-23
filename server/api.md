@@ -17,12 +17,34 @@
 
 ## 认证机制
 
-系统使用JWT（JSON Web Token）进行认证。除登录接口外，所有接口都需要在请求头中携带token。
+系统使用 JWT（JSON Web Token）进行认证。登录成功后，后端默认会把 JWT 写入 `HttpOnly Cookie`；后续请求会优先从 Cookie 中读取令牌。同时，后端也兼容从请求头读取 `Authorization: Bearer {token}`。
 
 ### 认证流程
 
-1. 调用登录接口获取token
-2. 在后续请求的Header中添加：`Authorization: Bearer {token}`
+1. 调用登录接口，提交邮箱和密码。
+2. 登录成功后，后端生成 JWT，并默认通过 `Set-Cookie` 写入 `token` Cookie（`HttpOnly`）。
+3. 后续请求访问受保护接口时，浏览器会自动携带 Cookie，无需前端手动拼接 token。
+4. 如果不是浏览器场景，也可以自行在请求头中传递：`Authorization: Bearer {token}`。
+
+### 认证方式
+
+系统同时支持以下两种认证方式：
+
+1. `Cookie` 方式（默认推荐）
+   登录成功后，服务端把 JWT 写入 `HttpOnly Cookie`。
+   浏览器后续请求会自动带上该 Cookie，前端 JavaScript 无需直接读取 token。
+
+2. `Bearer Token` 方式（兼容支持）
+   客户端可以在请求头中手动传递：
+
+   ```http
+   Authorization: Bearer <token>
+   ```
+
+说明：
+- 服务端校验时会优先读取 Cookie 中的 `token`。
+- 如果 Cookie 中没有 `token`，则回退到 `Authorization` 请求头。
+- 当前 Web 前端实际使用的是 Cookie 方案。
 
 ### 权限级别
 
@@ -75,12 +97,16 @@
     "code": 0,
     "msg": "登录成功",
     "data": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
       "token_type": "Bearer",
       "expires_in": 86400
     }
   }
   ```
+
+- **说明**:
+  - 当前实现会通过响应头 `Set-Cookie` 写入 `token` Cookie。
+  - 响应体中不会直接返回 `token` 字段。
+  - 如需使用 `Bearer Token` 方式，通常需要由客户端自行持有 token；当前默认 Web 登录流程不走这一路径。
 
 ### 用户管理
 

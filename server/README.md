@@ -115,9 +115,8 @@ func (a *AuthController) Login(c *gin.Context) {
         return
     }
     
-    // 返回响应
+    // 设置 HttpOnly Cookie，并返回响应
     utils.SuccessWithMsg(c, "登录成功", dto.LoginResponse{
-        Token:     token,
         TokenType: "Bearer",
         ExpiresIn: expiresIn,
     })
@@ -144,11 +143,15 @@ type LoginRequest struct {
 
 // 登录响应
 type LoginResponse struct {
-    Token     string `json:"token"`
     TokenType string `json:"token_type"`
     ExpiresIn int    `json:"expires_in"` // 过期时间，单位：秒
 }
 ```
+
+补充说明：
+- 当前实现默认通过 `HttpOnly Cookie` 保存 JWT，浏览器后续请求会自动携带。
+- 后端中间件同时兼容 `Authorization: Bearer {token}`。
+- Web 前端当前使用的是 Cookie 方式，响应体中不再直接返回 `token` 字段。
 
 ## 数据流向
 
@@ -338,4 +341,3 @@ go run cmd/gen.go
 
 仅构建或运行**后端镜像**（与 Docker 内 MySQL 联调等）的步骤见同目录下的 [`DOCKER_GUIDE.md`](DOCKER_GUIDE.md)。  
 前端、后端、数据库一起启动请使用仓库根目录的 `docker-compose.yml`，说明见根目录 [`README.md`](../README.md) 中的「Docker 部署」章节。
-
